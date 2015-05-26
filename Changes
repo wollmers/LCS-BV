@@ -1,6 +1,8 @@
 Revision history for LCS::BV
 
 {{$NEXT}}
+
+0.02  2015-05-26 11:43:18 CEST
         - bugfix: change constant 64 to detected $width
 
 0.01  2015-05-26 00:54:01 CEST
