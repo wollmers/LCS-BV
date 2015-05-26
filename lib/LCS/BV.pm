@@ -39,7 +39,7 @@ sub LCS {
   my $positions;
   my @lcs;
 
-  if ($amax < 64 ) {
+  if ($amax < $width ) {
     $positions->{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
 
     my $S = ~0;
