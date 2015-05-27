@@ -7,3 +7,7 @@ on test => sub {
     requires 'Test::Deep', '0';
     requires 'LCS', '0';
 };
+
+on 'develop' => sub {
+  requires 'Test::Spelling';
+};

@@ -4,13 +4,13 @@
       "Helmut Wollmersdorfer <helmut.wollmersdorfer@gmail.com>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 5.034, Dist::Milla version v1.0.14, CPAN::Meta::Converter version 2.150001",
+   "generated_by" : "Dist::Milla version v1.0.4, Dist::Zilla version 5.015, CPAN::Meta::Converter version 2.141170",
    "license" : [
       "perl_5"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
-      "version" : 2
+      "version" : "2"
    },
    "name" : "LCS-BV",
    "no_index" : {
@@ -31,8 +31,8 @@
       },
       "develop" : {
          "requires" : {
-            "Dist::Milla" : "v1.0.14",
-            "Test::Pod" : "1.41"
+            "Test::Pod" : "1.41",
+            "Test::Spelling" : "0"
          }
       },
       "runtime" : {
@@ -62,8 +62,8 @@
    },
    "version" : "0.02",
    "x_contributors" : [
-      "Helmut Wollmersdorfer <helmut@wollmersdorfer.at>",
-      "Helmut Wollmersdorfer <helmut.wollmersdorfer@fixpunkt.de>"
+      "Helmut Wollmersdorfer <helmut.wollmersdorfer@fixpunkt.de>",
+      "Helmut Wollmersdorfer <helmut@wollmersdorfer.at>"
    ]
 }
 
