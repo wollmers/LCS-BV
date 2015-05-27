@@ -60,10 +60,10 @@ sub LCS {
       $Vs->[$j] = $S;
     }
 
-  # recover alignment
-  #my @lcs;
-  my $i = $amax;
-  my $j = $bmax;
+    # recover alignment
+    #my @lcs;
+    my $i = $amax;
+    my $j = $bmax;
 
     while ($i >= $amin && $j >= $bmin) {
       if ($Vs->[$j] & (1<<$i)) {
@@ -93,7 +93,8 @@ sub LCS {
       $bj = $b->[$j];
 
       for (my $k=0; $k < $kmax; $k++ ) {
-        $S = ($j && defined($Vs->[$j-1]->[$k])) ? $Vs->[$j-1]->[$k] : ~0;
+        #$S = ($j && defined($Vs->[$j-1]->[$k])) ? $Vs->[$j-1]->[$k] : ~0;
+        $S = ($j) ? $Vs->[$j-1]->[$k] : ~0;
         unless (defined $positions->{$bj}->[$k]) {
           $Vs->[$j]->[$k] = $S;
           next;
