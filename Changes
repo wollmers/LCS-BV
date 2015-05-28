@@ -1,6 +1,8 @@
 Revision history for LCS::BV
 
 {{$NEXT}}
+
+0.04  2015-05-28 11:24:00 CEST
         - added author tests
 
 0.03  2015-05-27 20:26:27 CEST
