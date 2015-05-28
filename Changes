@@ -1,6 +1,7 @@
 Revision history for LCS::BV
 
 {{$NEXT}}
+        - added author tests
 
 0.03  2015-05-27 20:26:27 CEST
         - improved test coverage
