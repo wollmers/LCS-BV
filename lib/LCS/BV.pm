@@ -14,8 +14,8 @@ sub new {
   bless @_ ? @_ > 1 ? {@_} : {%{$_[0]}} : {}, ref $class || $class;
 }
 
-# H. Hyyrö. A Note on Bit-Parallel Alignment Computation. In
-# M. Simánek and J. Holub, editors, Stringology, pages 79–87. Department
+# H. Hyyroe. A Note on Bit-Parallel Alignment Computation. In
+# M. Simanek and J. Holub, editors, Stringology, pages 79-87. Department
 # of Computer Science and Engineering, Faculty of Electrical
 # Engineering, Czech Technical University, 2004.
 
