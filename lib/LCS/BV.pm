@@ -3,7 +3,7 @@ package LCS::BV;
 use 5.006;
 use strict;
 use warnings;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 #use utf8;
 
 our $width = int 0.999+log(~0)/log(2);
