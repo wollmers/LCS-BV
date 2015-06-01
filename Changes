@@ -1,6 +1,7 @@
 Revision history for LCS::BV
 
 {{$NEXT}}
+        - stable release
 
 0.04  2015-05-28 11:24:00 CEST
         - added author tests

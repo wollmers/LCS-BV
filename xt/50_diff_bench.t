@@ -53,7 +53,7 @@ print STDERR 'S::Similarity: ',similarity(@strings),"\n";
 
 
 
-if (0) {
+if (1) {
     cmpthese( 50_000, {
        'LCS' => sub {
             $traditional->LCS(@data)
@@ -93,7 +93,7 @@ if (0) {
     });
 }
 
-if (1) {
+if (0) {
     cmpthese( 1, {
        #'LCS' => sub {
        #     $traditional->LCS(@data3)
