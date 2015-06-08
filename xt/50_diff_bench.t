@@ -67,6 +67,9 @@ if (0) {
         'LCSbv' => sub {
             LCS::BV->LCS(@data)
         },
+        'LCStiny' => sub {
+            LCS::Tiny->LCS(@data)
+        },
         'S::Sim' => sub {
             similarity(@strings)
         },
@@ -93,28 +96,28 @@ if (0) {
     });
 }
 
-if (1) {
-    cmpthese( 1, {
+if (0) {
+    cmpthese( 1000, {
        #'LCS' => sub {
        #     $traditional->LCS(@data3)
        #},
        'LCSidx' => sub {
             Algorithm::Diff::LCSidx(@data3)
         },
-        #'LCSXS' => sub {
-        #    Algorithm::Diff::XS::LCSidx(@data3)
-        #},
+        'LCSXS' => sub {
+            Algorithm::Diff::XS::LCSidx(@data3)
+        },
         'LCSbv' => sub {
             LCS::BV->LCS(@data3)
         },
-        #'S::Sim' => sub {
-        #    similarity(@strings2)
-        #},
+        'LCStiny' => sub {
+            LCS::Tiny->LCS(@data3)
+        },
     });
 }
 
-if (0) {
-    timethese( 10_000, {
+if (1) {
+    timethese( 100_000, {
         'S::Sim' => sub {
             similarity(@strings3)
         },
