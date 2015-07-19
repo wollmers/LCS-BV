@@ -53,8 +53,8 @@ print STDERR 'S::Similarity: ',similarity(@strings),"\n";
 
 
 
-if (0) {
-    cmpthese( 50_000, {
+if (1) {
+    cmpthese( -1, {
        'LCS' => sub {
             $traditional->LCS(@data)
         },
@@ -76,8 +76,8 @@ if (0) {
     });
 }
 
-if (0) {
-    cmpthese( 10_000, {
+if (2) {
+    cmpthese( -1, {
        'LCS' => sub {
             $traditional->LCS(@data2)
         },
@@ -96,11 +96,11 @@ if (0) {
     });
 }
 
-if (0) {
-    cmpthese( 1000, {
-       #'LCS' => sub {
-       #     $traditional->LCS(@data3)
-       #},
+if (1) {
+    cmpthese( -1, {
+       'LCS' => sub {
+            $traditional->LCS(@data3)
+       },
        'LCSidx' => sub {
             Algorithm::Diff::LCSidx(@data3)
         },
@@ -116,7 +116,7 @@ if (0) {
     });
 }
 
-if (1) {
+if (0) {
     timethese( 100_000, {
         'S::Sim' => sub {
             similarity(@strings3)

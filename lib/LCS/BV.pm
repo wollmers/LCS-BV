@@ -3,8 +3,9 @@ package LCS::BV;
 use 5.006;
 use strict;
 use warnings;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 #use utf8;
+use Data::Dumper;
 
 our $width = int 0.999+log(~0)/log(2);
 
@@ -45,23 +46,17 @@ sub LCS {
     my $S = ~0;
 
     my $Vs = [];
-    my ($bj,$y,$u);
+    my ($y,$u);
 
     # outer loop
     for my $j ($bmin..$bmax) {
-      $bj = $b->[$j];
-      unless (defined $positions->{$bj}) {
-        $Vs->[$j] = $S;
-        next;
-      }
-      $y = $positions->{$bj};
-      $u = $S & $y;             # [Hyy04]
+      $y = $positions->{$b->[$j]} // 0;
+      $u = $S & $y;               # [Hyy04]
       $S = ($S + $u) | ($S - $u); # [Hyy04]
       $Vs->[$j] = $S;
     }
 
     # recover alignment
-    #my @lcs;
     my $i = $amax;
     my $j = $bmax;
 
@@ -82,35 +77,25 @@ sub LCS {
     $positions->{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
 
     my $S;
-
     my $Vs = [];
-    my ($bj,$y,$u,$carry);
+    my ($y,$u,$carry);
     my $kmax = $amax / $width + 1;
 
     # outer loop
     for my $j ($bmin..$bmax) {
       $carry = 0;
-      $bj = $b->[$j];
 
       for (my $k=0; $k < $kmax; $k++ ) {
-        #$S = ($j && defined($Vs->[$j-1]->[$k])) ? $Vs->[$j-1]->[$k] : ~0;
         $S = ($j) ? $Vs->[$j-1]->[$k] : ~0;
-        unless (defined $positions->{$bj}->[$k]) {
-          $Vs->[$j]->[$k] = $S;
-          next;
-        }
-        $y = $positions->{$bj}->[$k];
+        $S //= ~0;
+        $y = $positions->{$b->[$j]}->[$k] // 0;
         $u = $S & $y;             # [Hyy04]
-        #$S = ($S + $u + $carry) | ($S & ~$y);
-        #$Vs->[$j]->[$k] = $S;
         $Vs->[$j]->[$k] = $S = ($S + $u + $carry) | ($S & ~$y);
-        # carry = ((vv & u) | ((vv | u) & ~(vv + u + carry))) >> 63;
         $carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> 63;
       }
     }
 
     # recover alignment
-    #my @lcs;
     my $i = $amax;
     my $j = $bmax;
 

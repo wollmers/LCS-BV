@@ -7,28 +7,10 @@ use utf8;
 
 use lib qw(../lib/);
 
-use Test::More;
-use Test::Deep;
-#cmp_deeply([],any());
+use LCS::BV;
 
-use LCS;
-
-use Data::Dumper;
-
-my $class = 'LCS::BV';
-
-use_ok($class);
-
-my $object = new_ok($class);
-
-if (1) {
-ok($object->new());
-ok($object->new(1,2));
-ok($object->new({}));
-ok($object->new({a => 1}));
-
-ok($class->new());
-}
+# export NYTPROF=addtimestamp=1:start=init;perl -d:NYTProf 10_profile.t
+# nytprofhtml -f nytprof.out.1437103846 -o nytprof.1437103846
 
 my $examples = [
   ['ttatc__cg',
@@ -95,66 +77,21 @@ my $examples2 = [
     'abcdefghijklmnopqrstuvwxyz012345678!9!"$%&/()=?ABCDEFGHIJKLMNOPQRSTUVYZ'],
 ];
 
-
-if (1) {
-for my $example (@$examples) {
-#for my $example ($examples->[3]) {
-  my $a = $example->[0];
-  my $b = $example->[1];
-  my @a = $a =~ /([^_])/g;
-  my @b = $b =~ /([^_])/g;
-
-  cmp_deeply(
-    LCS::BV->LCS(\@a,\@b),
-    any(@{LCS->allLCS(\@a,\@b)} ),
-
-    "$a, $b"
-  );
-  if (0) {
-    $Data::Dumper::Deepcopy = 1;
-    print STDERR 'allLCS: ',Data::Dumper->Dump(LCS->allLCS(\@a,\@b)),"\n";
-
-    print STDERR 'LCS: ',Dumper(LCS::BV->LCS(\@a,\@b)),"\n";
-  }
-}
-}
-
-if (1) {
-for my $example (@$examples2) {
-#for my $example ($examples->[3]) {
-  my $a = $example->[0];
-  my $b = $example->[1];
-  my @a = $a =~ /([^_])/g;
-  my @b = $b =~ /([^_])/g;
-
-  cmp_deeply(
-    LCS::BV->LCS(\@a,\@b),
-    any(@{LCS->allLCS(\@a,\@b)} ),
-
-    "$a, $b"
-  );
-  if (0) {
-    $Data::Dumper::Deepcopy = 1;
-    print STDERR 'allLCS: ',Data::Dumper->Dump(LCS->allLCS(\@a,\@b)),"\n";
-    print STDERR 'LCS: ',Dumper(LCS::BV->LCS(\@a,\@b)),"\n";
-  }
-}
-}
-
 my @data3 = ([qw/a b d/ x 50], [qw/b a d c/ x 50]);
 
 if (0) {
-  cmp_deeply(
-    LCS::BV->LCS(@data3),
-    any(@{LCS->allLCS(@data3)} ),
-    '[qw/a b d/ x 50], [qw/b a d c/ x 50]'
-  );
-  if (0) {
-    $Data::Dumper::Deepcopy = 1;
-    print STDERR 'allLCS: ',Data::Dumper->Dump(LCS->allLCS(@data3)),"\n";
-    print STDERR 'LCS: ',Dumper(LCS::BV->LCS(@data3)),"\n";
-  }
+#for my $example (@$examples) {
+for my $example ($examples->[19]) {
+  my $a = $example->[0];
+  my $b = $example->[1];
+  my @a = $a =~ /([^_])/g;
+  my @b = $b =~ /([^_])/g;
+
+  LCS::BV->LCS(\@a,\@b);
+
+}
 }
 
-
-done_testing;
+if (1) {
+  LCS::BV->LCS(@data3);
+}

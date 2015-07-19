@@ -13,8 +13,8 @@ Makefile.old
 MANIFEST.bak
 META.yml
 MYMETA.yml
-nytprof.out
-nytprof/
+nytprof.out*
+nytprof*/
 pm_to_blib
 
 *~
