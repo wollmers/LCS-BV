@@ -79,6 +79,12 @@ my $examples = [
     '_bcdefgh'],
   [ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVY_',
     '_bcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYZ'],
+  [ 'aabbcc',
+    'abc'],
+  [ 'aaaabbbbcccc',
+    'abc'],
+  [ 'aaaabbcc',
+    'abc'],
 ];
 
 
