@@ -83,7 +83,7 @@ sub LCS {
 
     my $S = ~0;
 
-    my $Vs = [~0];
+    my $Vs = [];
     my ($y,$u);
 
     # outer loop
@@ -103,7 +103,11 @@ sub LCS {
         $i--;
       }
       else {
-        unless ($j && ~$Vs->[$j-1] & (1<<$i)) {
+        unless (
+           $j
+           && exists $Vs->[$j-1]
+           && ~$Vs->[$j-1] & (1<<$i)
+        ) {
            unshift @lcs, [$i,$j];
            $i--;
         }
@@ -143,7 +147,11 @@ sub LCS {
         $i--;
       }
       else {
-        unless ($j && ~$Vs->[$j-1]->[$k] & (1<<($i % $width))) {
+        unless (
+           $j
+           && exists $Vs->[$j-1]->[$k]
+           && ~$Vs->[$j-1]->[$k] & (1<<($i % $width))
+        ) {
            unshift @lcs, [$i,$j];
            $i--;
         }
@@ -209,6 +217,10 @@ LCS() call.
 
 =over 4
 
+=item LLCS(\@a,\@b)
+
+Return the length of a Longest Common Subsequence, taking two arrayrefs as method
+arguments. It returns an integer.
 
 =item LCS(\@a,\@b)
 
