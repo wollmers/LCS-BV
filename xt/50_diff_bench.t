@@ -10,21 +10,21 @@ use lib qw(../lib/);
 #use Test::More;
 
 use Algorithm::Diff;
-use Algorithm::Diff::XS;
+#use Algorithm::Diff::XS;
 use String::Similarity;
 #use Algorithm::LCS;
 
 use Benchmark qw(:all) ;
 use Data::Dumper;
 
-use LCS::Tiny;
-use LCS;
+#use LCS::Tiny;
+#use LCS;
 use LCS::BV;
 
 #my $align = Align::Sequence->new;
 
-my $align_bv = LCS::Tiny->new;
-my $traditional = LCS->new();
+#my $align_bv = LCS::Tiny->new;
+#my $traditional = LCS->new();
 
 #my $A_LCS = Algorithm::LCS->new();
 
@@ -55,31 +55,31 @@ print STDERR 'S::Similarity: ',similarity(@strings),"\n";
 
 if (1) {
     cmpthese( -1, {
-       'LCS' => sub {
-            $traditional->LCS(@data)
-        },
+       #'LCS' => sub {
+            #$traditional->LCS(@data)
+        #},
        'LCSidx' => sub {
             Algorithm::Diff::LCSidx(@data)
         },
-        'LCSXS' => sub {
-            Algorithm::Diff::XS::LCSidx(@data)
-        },
+#        'LCSXS' => sub {
+#            Algorithm::Diff::XS::LCSidx(@data)
+#        },
         'LCSbv' => sub {
             LCS::BV->LCS(@data)
         },
-        'LCStiny' => sub {
-            LCS::Tiny->LCS(@data)
-        },
+        #'LCStiny' => sub {
+            #LCS::Tiny->LCS(@data)
+        #},
         'S::Sim' => sub {
             similarity(@strings)
         },
     });
 }
 
-if (2) {
+if (0) {
     cmpthese( -1, {
        'LCS' => sub {
-            $traditional->LCS(@data2)
+            #$traditional->LCS(@data2)
         },
        'LCSidx' => sub {
             Algorithm::Diff::LCSidx(@data2)
@@ -96,10 +96,10 @@ if (2) {
     });
 }
 
-if (1) {
+if (0) {
     cmpthese( -1, {
        'LCS' => sub {
-            $traditional->LCS(@data3)
+            #$traditional->LCS(@data3)
        },
        'LCSidx' => sub {
             Algorithm::Diff::LCSidx(@data3)

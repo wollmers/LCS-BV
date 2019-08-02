@@ -20,6 +20,44 @@ sub new {
 # of Computer Science and Engineering, Faculty of Electrical
 # Engineering, Czech Technical University, 2004.
 
+sub LLCS {
+  my ($self,$a,$b) = @_;
+
+  use integer;
+  no warnings 'portable'; # for 0xffffffffffffffff
+
+  my ($amin, $amax, $bmin, $bmax) = (0, length($a)-1, 0, length($b)-1);
+
+  while ($amin <= $amax and $bmin <= $bmax and substr($a,$amin,1) eq substr($b,$bmin,1)) {
+    $amin++;
+    $bmin++;
+  }
+  while ($amin <= $amax and $bmin <= $bmax and substr($a,$amax,1) eq substr($b,$bmax,1)) {
+    $amax--;
+    $bmax--;
+  }
+
+  my $positions;
+  $positions->{substr($a,$_,1)} |= 1 << ($_ % $width) for $amin..$amax;
+
+  my $v = ~0;
+  my ($p,$u);
+
+  for ($bmin..$bmax) {
+    $p = $positions->{substr($b,$_,1)} // 0;
+    $u = $v & $p;
+    $v = ($v + $u) | ($v - $u);
+  }
+  $v = ~$v;
+
+  $v = $v - (($v >> 1) & 0x5555555555555555);
+  $v = ($v & 0x3333333333333333) + (($v >> 2) & 0x3333333333333333);
+  # (bytesof($v) -1) * bitsofbyte = (8-1)*8 = 56 ----------------------vv
+  $v = (($v + ($v >> 4) & 0x0f0f0f0f0f0f0f0f) * 0x0101010101010101) >> 56;
+
+  return $amin + $v + length($a) - ($amax+1);
+}
+
 sub LCS {
   my ($self, $a, $b) = @_;
 
@@ -91,7 +129,7 @@ sub LCS {
         $y = $positions->{$b->[$j]}->[$k] // 0;
         $u = $S & $y;             # [Hyy04]
         $Vs->[$j]->[$k] = $S = ($S + $u + $carry) | ($S & ~$y);
-        $carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> 63;
+        $carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> 63; # TODO: $width-1
       }
     }
 

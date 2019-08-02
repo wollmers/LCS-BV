@@ -20,3 +20,17 @@ LCStiny   44660/s    463%     63%      --    -22%    -30%    -96%
 LCSXS     57536/s    626%    110%     29%      --     -9%    -95%
 LCSbv     63433/s    700%    131%     42%     10%      --    -95%
 S::Sim  1183289/s  14823%   4214%   2550%   1957%   1765%      --
+
+# MacPro i7 perl v5.20.1
+            Rate LCSidx  LCSXS  LCSbv S::Sim
+LCSidx   32880/s     --   -54%   -56%   -98%
+LCSXS    71087/s   116%     --    -5%   -95%
+LCSbv    74472/s   126%     5%     --   -95%
+S::Sim 1429134/s  4247%  1910%  1819%     --
+
+# MacPro i7 cperl v5.28.1
+            Rate LCSidx  LCSbv S::Sim
+LCSidx   38745/s     --   -58%   -98%
+LCSbv    91995/s   137%     --   -94%
+S::Sim 1592889/s  4011%  1631%     --
+
