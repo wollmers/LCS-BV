@@ -83,7 +83,7 @@ sub LCS {
 
     my $S = ~0;
 
-    my $Vs = [];
+    my $Vs = [~0];
     my ($y,$u);
 
     # outer loop
