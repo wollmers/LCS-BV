@@ -128,6 +128,29 @@ for my $example (@$examples) {
 }
 
 if (1) {
+for my $example (@$examples) {
+#for my $example ($examples->[3]) {
+  my $a = $example->[1];
+  my $b = $example->[0];
+  my @a = $a =~ /([^_])/g;
+  my @b = $b =~ /([^_])/g;
+
+  cmp_deeply(
+    LCS::BV->LCS(\@a,\@b),
+    any(@{LCS->allLCS(\@a,\@b)} ),
+
+    "$a, $b"
+  );
+  if (0) {
+    $Data::Dumper::Deepcopy = 1;
+    print STDERR 'allLCS: ',Data::Dumper->Dump(LCS->allLCS(\@a,\@b)),"\n";
+
+    print STDERR 'LCS: ',Dumper(LCS::BV->LCS(\@a,\@b)),"\n";
+  }
+}
+}
+
+if (1) {
 for my $example (@$examples2) {
 #for my $example ($examples->[3]) {
   my $a = $example->[0];
@@ -149,8 +172,31 @@ for my $example (@$examples2) {
 }
 }
 
+if (1) {
+for my $example (@$examples2) {
+#for my $example ($examples->[3]) {
+  my $a = $example->[1];
+  my $b = $example->[0];
+  my @a = $a =~ /([^_])/g;
+  my @b = $b =~ /([^_])/g;
+
+  cmp_deeply(
+    LCS::BV->LCS(\@a,\@b),
+    any(@{LCS->allLCS(\@a,\@b)} ),
+
+    "$a, $b"
+  );
+  if (0) {
+    $Data::Dumper::Deepcopy = 1;
+    print STDERR 'allLCS: ',Data::Dumper->Dump(LCS->allLCS(\@a,\@b)),"\n";
+    print STDERR 'LCS: ',Dumper(LCS::BV->LCS(\@a,\@b)),"\n";
+  }
+}
+}
+
 my @data3 = ([qw/a b d/ x 50], [qw/b a d c/ x 50]);
 
+# allLCS will need 100 years
 if (0) {
   cmp_deeply(
     LCS::BV->LCS(@data3),
@@ -164,5 +210,40 @@ if (0) {
   }
 }
 
+if (0) {
+  is(
+    scalar @{LCS::BV->LCS(@data3)},
+    LCS->LLCS(@data3),
+    '[qw/a b d/ x 50], [qw/b a d c/ x 50] -> ' . LCS->LLCS(@data3)
+  );
+  if (1) {
+    $Data::Dumper::Deepcopy = 1;
+    print STDERR 'LCS->LCS: ',Dumper(LCS->LCS(@data3)),"\n";
+    print STDERR 'LCS::BV->LCS: ',Dumper(LCS::BV->LCS(@data3)),"\n";
+  }
+}
+
+
+if (0) {
+  my $rep1 = 33;
+  my $rep2 = 2;
+  my $a = 'abcd';
+  my $b = 'bc';
+  my @a = $a =~ /([^_])/g;
+  my @b = $b =~ /([^_])/g;
+  #my @data4 = ([qw/a b d/ x $rep], [qw/b a d c/ x $rep]);
+  my @data4 = ([(@a) x $rep1], [(@b) x $rep2]);
+
+  is(
+    scalar @{LCS::BV->LCS(@data4)},
+    LCS->LLCS(@data4),
+    "[$a x $rep1], [$b x $rep2] -> " . LCS->LLCS(@data4)
+  );
+  if (0) {
+    $Data::Dumper::Deepcopy = 1;
+    #print STDERR 'LCS->LCS: ',Dumper(LCS->LCS(@data4)),"\n";
+    #print STDERR 'LCS::BV->LCS: ',Dumper(LCS::BV->LCS(@data4)),"\n";
+  }
+}
 
 done_testing;

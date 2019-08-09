@@ -77,8 +77,14 @@ my $examples = [
     're'],
   [ 'abcdefg_',
     '_bcdefgh'],
-  [ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVY_',
+  [ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVY_', # l=52
     '_bcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYZ'],
+  [ 'aabbcc',
+    'abc'],
+  [ 'aaaabbbbcccc',
+    'abc'],
+  [ 'aaaabbcc',
+    'abc'],
 ];
 
 
@@ -93,6 +99,8 @@ my $examples2 = [
     'abcdefghijklmnopqrstuvwxyz012345678_9!"$%&/()=?ABCDEFGHIJKLMNOPQRSTUVYZ'],
   [ 'abcdefghijklmnopqrstuvwxyz012345678_9!"$%&/()=?ABCDEFGHIJKLMNOPQRSTUVYZ',
     'abcdefghijklmnopqrstuvwxyz012345678!9!"$%&/()=?ABCDEFGHIJKLMNOPQRSTUVYZ'],
+  [ 'aaabcdefghijklmnopqrstuvwxyz012345678_9!"$%&/()=?ABCDEFGHIJKLMNOPQRSTUVYZZZ',
+    'a!Z'],
 ];
 
 
@@ -105,10 +113,10 @@ for my $example (@$examples) {
   my @b = $b =~ /([^_])/g;
 
   is(
-    LCS::BV->LLCS($a,$b),
+    LCS::BV->LLCS(\@a,\@b),
     LCS->LLCS(\@a,\@b),
 
-    "$a, $b"
+    "$a, $b -> " . LCS::BV->LLCS(\@a,\@b)
   );
 }
 }
@@ -122,29 +130,30 @@ for my $example (@$examples2) {
   my @b = $b =~ /([^_])/g;
 
   is(
-    LCS::BV->LLCS($a,$b),
+    LCS::BV->LLCS(\@a,\@b),
     LCS->LLCS(\@a,\@b),
 
-    "$a, $b"
+    "$a, $b -> " . LCS::BV->LLCS(\@a,\@b)
   );
 
 }
 }
 
-=pod
+
 
 my @data3 = ([qw/a b d/ x 50], [qw/b a d c/ x 50]);
 
 if (0) {
-  cmp_deeply(
-    LCS::BV->LCS(@data3),
-    any(@{LCS->allLCS(@data3)} ),
-    '[qw/a b d/ x 50], [qw/b a d c/ x 50]'
+  is(
+    LCS::BV->LLCS(@data3),
+    LCS->LLCS(@data3),
+
+    '[qw/a b d/ x 50], [qw/b a d c/ x 50] -> ' . LCS::BV->LLCS(@data3)
   );
 
 }
 
-=cut
+
 
 
 done_testing;

@@ -26,44 +26,6 @@ sub LLCS {
   use integer;
   no warnings 'portable'; # for 0xffffffffffffffff
 
-  my ($amin, $amax, $bmin, $bmax) = (0, length($a)-1, 0, length($b)-1);
-
-  while ($amin <= $amax and $bmin <= $bmax and substr($a,$amin,1) eq substr($b,$bmin,1)) {
-    $amin++;
-    $bmin++;
-  }
-  while ($amin <= $amax and $bmin <= $bmax and substr($a,$amax,1) eq substr($b,$bmax,1)) {
-    $amax--;
-    $bmax--;
-  }
-
-  my $positions;
-  $positions->{substr($a,$_,1)} |= 1 << ($_ % $width) for $amin..$amax;
-
-  my $v = ~0;
-  my ($p,$u);
-
-  for ($bmin..$bmax) {
-    $p = $positions->{substr($b,$_,1)} // 0;
-    $u = $v & $p;
-    $v = ($v + $u) | ($v - $u);
-  }
-  $v = ~$v;
-
-  $v = $v - (($v >> 1) & 0x5555555555555555);
-  $v = ($v & 0x3333333333333333) + (($v >> 2) & 0x3333333333333333);
-  # (bytesof($v) -1) * bitsofbyte = (8-1)*8 = 56 ----------------------vv
-  $v = (($v + ($v >> 4) & 0x0f0f0f0f0f0f0f0f) * 0x0101010101010101) >> 56;
-
-  return $amin + $v + length($a) - ($amax+1);
-}
-
-sub LCS {
-  my ($self, $a, $b) = @_;
-
-  use integer;
-  no warnings 'portable'; # for 0xffffffffffffffff
-
   my ($amin, $amax, $bmin, $bmax) = (0, $#$a, 0, $#$b);
 
   while ($amin <= $amax and $bmin <= $bmax and $a->[$amin] eq $b->[$bmin]) {
@@ -76,9 +38,80 @@ sub LCS {
   }
 
   my $positions;
+  $positions->{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
+
+  my $v = ~0;
+  my ($p,$u);
+
+  for my $j ($bmin..$bmax) {
+    $p = $positions->{$b->[$j]} // 0;
+    $u = $v & $p;
+    $v = ($v + $u) | ($v - $u);
+  }
+  $v = ~$v;
+
+  #$v = $v - (($v >> 1) & 0x5555555555555555);
+  #$v = ($v & 0x3333333333333333) + (($v >> 2) & 0x3333333333333333);
+  ## (bytesof($v) -1) * bitsofbyte = (8-1)*8 = 56 ----------------------vv
+  #$v = (($v + ($v >> 4) & 0x0f0f0f0f0f0f0f0f) * 0x0101010101010101) >> 56;
+  #return $amin + $v + scalar(@$a) - ($amax+1);
+
+  return $amin + _count_bits($v) + scalar(@$a) - ($amax+1);
+}
+
+=pod
+
+int count_bits(uint64_t bits) {
+  bits = (bits & 0x5555555555555555ull) + ((bits & 0xaaaaaaaaaaaaaaaaull) >> 1);
+  bits = (bits & 0x3333333333333333ull) + ((bits & 0xccccccccccccccccull) >> 2);
+  bits = (bits & 0x0f0f0f0f0f0f0f0full) + ((bits & 0xf0f0f0f0f0f0f0f0ull) >> 4);
+  bits = (bits & 0x00ff00ff00ff00ffull) + ((bits & 0xff00ff00ff00ff00ull) >> 8);
+  bits = (bits & 0x0000ffff0000ffffull) + ((bits & 0xffff0000ffff0000ull) >>16);
+  return (bits & 0x00000000ffffffffull) + ((bits & 0xffffffff00000000ull) >>32);
+}
+
+=cut
+
+
+sub _count_bits {
+  my $v = shift;
+
+  use integer;
+  no warnings 'portable'; # for 0xffffffffffffffff
+
+  $v = $v - (($v >> 1) & 0x5555555555555555);
+  $v = ($v & 0x3333333333333333) + (($v >> 2) & 0x3333333333333333);
+  # (bytesof($v) -1) * bitsofbyte = (8-1)*8 = 56 ----------------------vv
+  $v = (($v + ($v >> 4) & 0x0f0f0f0f0f0f0f0f) * 0x0101010101010101) >> 56;
+  return $v;
+}
+
+
+
+
+sub LCS {
+  my ($self, $a, $b) = @_;
+
+  use integer;
+  no warnings 'portable'; # for 0xffffffffffffffff
+
+  my ($amin, $amax, $bmin, $bmax) = (0, $#$a, 0, $#$b);
+
+  if (0) {
+  while ($amin <= $amax and $bmin <= $bmax and $a->[$amin] eq $b->[$bmin]) {
+    $amin++;
+    $bmin++;
+  }
+  while ($amin <= $amax and $bmin <= $bmax and $a->[$amax] eq $b->[$bmax]) {
+    $amax--;
+    $bmax--;
+  }
+  }
+
+  my $positions;
   my @lcs;
 
-  if ($amax < $width ) {
+  if (0 && $amax < $width ) {
     $positions->{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
 
     my $S = ~0;
@@ -116,26 +149,77 @@ sub LCS {
     }
   }
   else {
+    # $width = 4;
     $positions->{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
+
+    if (1) {
+      print STDERR '$positions: ',"\n";
+      for my $char (sort keys %$positions) {
+
+        print STDERR "$char: ","\n";
+        for my $map (@{$positions->{$char}}) {
+          print STDERR sprintf('%064b',$map),"\n";
+        }
+      }
+      print STDERR "\n";
+    }
 
     my $S;
     my $Vs = [];
     my ($y,$u,$carry);
     my $kmax = $amax / $width + 1;
 
+    print STDERR '$kmax: ',$kmax,"\n";
+
     # outer loop
     for my $j ($bmin..$bmax) {
+      print STDERR '  $j: ',$j,"\n";
       $carry = 0;
 
       for (my $k=0; $k < $kmax; $k++ ) {
+        print STDERR '    $k: ',$k,"\n";
+
         $S = ($j) ? $Vs->[$j-1]->[$k] : ~0;
+        print STDERR '    $S: ',"\n",sprintf('%064b',$S),"\n";
+
         $S //= ~0;
+        print STDERR '    $S: ',"\n",sprintf('%064b',$S),"\n";
+
         $y = $positions->{$b->[$j]}->[$k] // 0;
+        print STDERR '    $y: ',"\n",sprintf('%064b',$y),"\n";
+
+
         $u = $S & $y;             # [Hyy04]
+        print STDERR '    $u: ',"\n",sprintf('%064b',$u),"\n";
+
+
         $Vs->[$j]->[$k] = $S = ($S + $u + $carry) | ($S & ~$y);
-        $carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> 63; # TODO: $width-1
+        print STDERR '    $Vs->[$j]->[$k]: ',"\n",sprintf('%064b',$Vs->[$j]->[$k]),"\n";
+
+        print STDERR '    ~($S + $u + $carry): ',"\n",sprintf('%064b',~($S + $u + $carry)),"\n";
+        print STDERR '    ($S & $u): ',"\n",sprintf('%064b',($S & $u)),"\n";
+        print STDERR '    ($S | $u): ',"\n",sprintf('%064b',~($S | $u)),"\n";
+        #$carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> 63; # TODO: $width-1
+        $carry = (($S & $u) | (($S | $u) & ($S + $u + $carry))) >> ($width-1); # $width-1
+        print STDERR '    $carry: ',"\n",sprintf('%064b',$carry),"\n";
       }
     }
+
+=pod
+
+	a_s = &a_strings[index][0];
+	bottombit = 1;
+	for (j = 0; j < nwords; j++) {
+		y = *(last++);
+		x =  y | *(a_s++);
+		top_borrow = (y >> (WLEN - 1)) & 0x1;
+		y = ((y << 1) | bottombit);
+		if (x < y)
+			top_borrow = 1;
+		*(cur++) = x & ((x - y) ^ x);
+		bottombit = top_borrow;
+
+=cut
 
     # recover alignment
     my $i = $amax;
@@ -250,7 +334,7 @@ Helmut Wollmersdorfer E<lt>helmut.wollmersdorfer@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2014-2015 by Helmut Wollmersdorfer
+Copyright 2014-2019 by Helmut Wollmersdorfer
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
