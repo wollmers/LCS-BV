@@ -59,18 +59,16 @@ sub LLCS {
   return $amin + _count_bits($v) + scalar(@$a) - ($amax+1);
 }
 
-=pod
 
-int count_bits(uint64_t bits) {
-  bits = (bits & 0x5555555555555555ull) + ((bits & 0xaaaaaaaaaaaaaaaaull) >> 1);
-  bits = (bits & 0x3333333333333333ull) + ((bits & 0xccccccccccccccccull) >> 2);
-  bits = (bits & 0x0f0f0f0f0f0f0f0full) + ((bits & 0xf0f0f0f0f0f0f0f0ull) >> 4);
-  bits = (bits & 0x00ff00ff00ff00ffull) + ((bits & 0xff00ff00ff00ff00ull) >> 8);
-  bits = (bits & 0x0000ffff0000ffffull) + ((bits & 0xffff0000ffff0000ull) >>16);
-  return (bits & 0x00000000ffffffffull) + ((bits & 0xffffffff00000000ull) >>32);
-}
+#int count_bits(uint64_t bits) {
+#  bits = (bits & 0x5555555555555555ull) + ((bits & 0xaaaaaaaaaaaaaaaaull) >> 1);
+#  bits = (bits & 0x3333333333333333ull) + ((bits & 0xccccccccccccccccull) >> 2);
+#  bits = (bits & 0x0f0f0f0f0f0f0f0full) + ((bits & 0xf0f0f0f0f0f0f0f0ull) >> 4);
+#  bits = (bits & 0x00ff00ff00ff00ffull) + ((bits & 0xff00ff00ff00ff00ull) >> 8);
+#  bits = (bits & 0x0000ffff0000ffffull) + ((bits & 0xffff0000ffff0000ull) >>16);
+#  return (bits & 0x00000000ffffffffull) + ((bits & 0xffffffff00000000ull) >>32);
+#}
 
-=cut
 
 
 sub _count_bits {
@@ -149,19 +147,20 @@ sub LCS {
     }
   }
   else {
+    my $VERBOSE = 0;
     # $width = 4;
     $positions->{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
 
     if (1) {
-      print STDERR '$positions: ',"\n";
+      print STDERR '$positions: ',"\n" if $VERBOSE;
       for my $char (sort keys %$positions) {
 
         print STDERR "$char: ","\n";
         for my $map (@{$positions->{$char}}) {
-          print STDERR sprintf('%064b',$map),"\n";
+          print STDERR sprintf('%064b',$map),"\n" if $VERBOSE;
         }
       }
-      print STDERR "\n";
+      print STDERR "\n" if $VERBOSE;
     }
 
     my $S;
@@ -169,55 +168,55 @@ sub LCS {
     my ($y,$u,$carry);
     my $kmax = $amax / $width + 1;
 
-    print STDERR '$kmax: ',$kmax,"\n";
+    print STDERR '$kmax: ',$kmax,"\n" if $VERBOSE;
 
     # outer loop
     for my $j ($bmin..$bmax) {
-      print STDERR '  $j: ',$j,"\n";
+      print STDERR '  $j: ',$j,"\n" if $VERBOSE;
       $carry = 0;
 
       for (my $k=0; $k < $kmax; $k++ ) {
         print STDERR '    $k: ',$k,"\n";
 
         $S = ($j) ? $Vs->[$j-1]->[$k] : ~0;
-        print STDERR '    $S: ',"\n",sprintf('%064b',$S),"\n";
+        print STDERR '    $S: ',"\n",sprintf('%064b',$S),"\n" if $VERBOSE;
 
         $S //= ~0;
-        print STDERR '    $S: ',"\n",sprintf('%064b',$S),"\n";
+        print STDERR '    $S: ',"\n",sprintf('%064b',$S),"\n" if $VERBOSE;
 
         $y = $positions->{$b->[$j]}->[$k] // 0;
-        print STDERR '    $y: ',"\n",sprintf('%064b',$y),"\n";
+        print STDERR '    $y: ',"\n",sprintf('%064b',$y),"\n" if $VERBOSE;
 
 
         $u = $S & $y;             # [Hyy04]
-        print STDERR '    $u: ',"\n",sprintf('%064b',$u),"\n";
+        print STDERR '    $u: ',"\n",sprintf('%064b',$u),"\n" if $VERBOSE;
 
 
         $Vs->[$j]->[$k] = $S = ($S + $u + $carry) | ($S & ~$y);
-        print STDERR '    $Vs->[$j]->[$k]: ',"\n",sprintf('%064b',$Vs->[$j]->[$k]),"\n";
+        print STDERR '    $Vs->[$j]->[$k]: ',"\n",sprintf('%064b',$Vs->[$j]->[$k]),"\n" if $VERBOSE;
 
-        print STDERR '    ~($S + $u + $carry): ',"\n",sprintf('%064b',~($S + $u + $carry)),"\n";
-        print STDERR '    ($S & $u): ',"\n",sprintf('%064b',($S & $u)),"\n";
+        print STDERR '    ~($S + $u + $carry): ',"\n",sprintf('%064b',~($S + $u + $carry)),"\n" if $VERBOSE;
+        print STDERR '    ($S & $u): ',"\n",sprintf('%064b',($S & $u)),"\n" if $VERBOSE;
         print STDERR '    ($S | $u): ',"\n",sprintf('%064b',~($S | $u)),"\n";
         #$carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> 63; # TODO: $width-1
         $carry = (($S & $u) | (($S | $u) & ($S + $u + $carry))) >> ($width-1); # $width-1
-        print STDERR '    $carry: ',"\n",sprintf('%064b',$carry),"\n";
+        print STDERR '    $carry: ',"\n",sprintf('%064b',$carry),"\n" if $VERBOSE;
       }
     }
 
 =pod
 
-	a_s = &a_strings[index][0];
-	bottombit = 1;
-	for (j = 0; j < nwords; j++) {
-		y = *(last++);
-		x =  y | *(a_s++);
-		top_borrow = (y >> (WLEN - 1)) & 0x1;
-		y = ((y << 1) | bottombit);
-		if (x < y)
-			top_borrow = 1;
-		*(cur++) = x & ((x - y) ^ x);
-		bottombit = top_borrow;
+    a_s = &a_strings[index][0];
+    bottombit = 1;
+    for (j = 0; j < nwords; j++) {
+        y = *(last++);
+        x =  y | *(a_s++);
+        top_borrow = (y >> (WLEN - 1)) & 0x1;
+        y = ((y << 1) | bottombit);
+        if (x < y)
+            top_borrow = 1;
+        *(cur++) = x & ((x - y) ^ x);
+        bottombit = top_borrow;
 
 =cut
 
