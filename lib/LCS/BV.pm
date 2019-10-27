@@ -105,41 +105,39 @@ sub LCS {
   my $positions;
   my @lcs;
 
-  if ($amax) {
-    $positions->{$a->[$_]} |= 1 << $_ for $amin..$amax;
+  $positions->{$a->[$_]} |= 1 << $_ for $amin..$amax;
 
-    my $S = ~0;
+  my $S = ~0;
 
-    my $Vs = [];
-    my ($y,$u);
+  my $Vs = [];
+  my ($y,$u);
 
-    # outer loop
-    for my $j ($bmin..$bmax) {
-      $y = $positions->{$b->[$j]} // 0;
-      $u = $S & $y;               # [Hyy04]
-      $S = ($S + $u) | ($S - $u); # [Hyy04]
-      $Vs->[$j] = $S;
+  # outer loop
+  for my $j ($bmin..$bmax) {
+    $y = $positions->{$b->[$j]} // 0;
+    $u = $S & $y;               # [Hyy04]
+    $S = ($S + $u) | ($S - $u); # [Hyy04]
+    $Vs->[$j] = $S;
+  }
+
+  # recover alignment
+  my $i = $amax;
+  my $j = $bmax;
+
+  while ($i >= $amin && $j >= $bmin) {
+    if ($Vs->[$j] & (1<<$i)) {
+      $i--;
     }
-
-    # recover alignment
-    my $i = $amax;
-    my $j = $bmax;
-
-    while ($i >= $amin && $j >= $bmin) {
-      if ($Vs->[$j] & (1<<$i)) {
-        $i--;
+    else {
+      unless (
+         $j
+         && exists $Vs->[$j-1]
+         && ~$Vs->[$j-1] & (1<<$i)
+      ) {
+         unshift @lcs, [$i,$j];
+         $i--;
       }
-      else {
-        unless (
-           $j
-           && exists $Vs->[$j-1]
-           && ~$Vs->[$j-1] & (1<<$i)
-        ) {
-           unshift @lcs, [$i,$j];
-           $i--;
-        }
-        $j--;
-      }
+      $j--;
     }
   }
 
