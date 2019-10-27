@@ -101,6 +101,10 @@ my $examples2 = [
     'abcdefghijklmnopqrstuvwxyz012345678!9!"$%&/()=?ABCDEFGHIJKLMNOPQRSTUVYZ'],
   [ 'aaabcdefghijklmnopqrstuvwxyz012345678_9!"$%&/()=?ABCDEFGHIJKLMNOPQRSTUVYZZZ',
     'a!Z'],
+  [ ('_' x 100) . '0123456789abcdef' . ('!@#$%^&*()' x 100),
+    'abc' ],
+  [ '__0',
+    ('_' x 100) . '0123456789abcdef' . ('!@#$%^&*()' x 100) ],
 ];
 
 
