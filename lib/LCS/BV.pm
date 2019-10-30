@@ -7,8 +7,6 @@ our $VERSION = '0.06';
 #use utf8;
 use Data::Dumper;
 
-our $width = int 0.999+log(~0)/log(2);
-
 sub new {
   my $class = shift;
   # uncoverable condition false
@@ -38,7 +36,7 @@ sub LLCS {
   }
 
   my $positions;
-  $positions->{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
+  $positions->{$a->[$_]} |= 1 << $_ for $amin..$amax;
 
   my $v = ~0;
   my ($p,$u);
@@ -90,12 +88,11 @@ sub _count_bits {
 sub LCS {
   my ($self, $a, $b) = @_;
 
-  use integer;
+  use bigint;
   no warnings 'portable'; # for 0xffffffffffffffff
 
   my ($amin, $amax, $bmin, $bmax) = (0, $#$a, 0, $#$b);
 
-  if (0) {
   while ($amin <= $amax and $bmin <= $bmax and $a->[$amin] eq $b->[$bmin]) {
     $amin++;
     $bmin++;
@@ -104,142 +101,43 @@ sub LCS {
     $amax--;
     $bmax--;
   }
-  }
 
   my $positions;
   my @lcs;
 
-  if (0 && $amax < $width ) {
-    $positions->{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
+  $positions->{$a->[$_]} |= 1 << $_ for $amin..$amax;
 
-    my $S = ~0;
+  my $S = ~0;
 
-    my $Vs = [];
-    my ($y,$u);
+  my $Vs = [];
+  my ($y,$u);
 
-    # outer loop
-    for my $j ($bmin..$bmax) {
-      $y = $positions->{$b->[$j]} // 0;
-      $u = $S & $y;               # [Hyy04]
-      $S = ($S + $u) | ($S - $u); # [Hyy04]
-      $Vs->[$j] = $S;
-    }
-
-    # recover alignment
-    my $i = $amax;
-    my $j = $bmax;
-
-    while ($i >= $amin && $j >= $bmin) {
-      if ($Vs->[$j] & (1<<$i)) {
-        $i--;
-      }
-      else {
-        unless (
-           $j
-           && exists $Vs->[$j-1]
-           && ~$Vs->[$j-1] & (1<<$i)
-        ) {
-           unshift @lcs, [$i,$j];
-           $i--;
-        }
-        $j--;
-      }
-    }
+  # outer loop
+  for my $j ($bmin..$bmax) {
+    $y = $positions->{$b->[$j]} // 0;
+    $u = $S & $y;               # [Hyy04]
+    $S = ($S + $u) | ($S - $u); # [Hyy04]
+    $Vs->[$j] = $S;
   }
-  else {
-    my $VERBOSE = 0;
-    # $width = 4;
-    $positions->{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
 
-    if (1) {
-      print STDERR '$positions: ',"\n" if $VERBOSE;
-      for my $char (sort keys %$positions) {
+  # recover alignment
+  my $i = $amax;
+  my $j = $bmax;
 
-        print STDERR "$char: ","\n";
-        for my $map (@{$positions->{$char}}) {
-          print STDERR sprintf('%064b',$map),"\n" if $VERBOSE;
-        }
-      }
-      print STDERR "\n" if $VERBOSE;
+  while ($i >= $amin && $j >= $bmin) {
+    if ($Vs->[$j] & (1<<$i)) {
+      $i--;
     }
-
-    my $S;
-    my $Vs = [];
-    my ($y,$u,$carry);
-    my $kmax = $amax / $width + 1;
-
-    print STDERR '$kmax: ',$kmax,"\n" if $VERBOSE;
-
-    # outer loop
-    for my $j ($bmin..$bmax) {
-      print STDERR '  $j: ',$j,"\n" if $VERBOSE;
-      $carry = 0;
-
-      for (my $k=0; $k < $kmax; $k++ ) {
-        print STDERR '    $k: ',$k,"\n";
-
-        $S = ($j) ? $Vs->[$j-1]->[$k] : ~0;
-        print STDERR '    $S: ',"\n",sprintf('%064b',$S),"\n" if $VERBOSE;
-
-        $S //= ~0;
-        print STDERR '    $S: ',"\n",sprintf('%064b',$S),"\n" if $VERBOSE;
-
-        $y = $positions->{$b->[$j]}->[$k] // 0;
-        print STDERR '    $y: ',"\n",sprintf('%064b',$y),"\n" if $VERBOSE;
-
-
-        $u = $S & $y;             # [Hyy04]
-        print STDERR '    $u: ',"\n",sprintf('%064b',$u),"\n" if $VERBOSE;
-
-
-        $Vs->[$j]->[$k] = $S = ($S + $u + $carry) | ($S & ~$y);
-        print STDERR '    $Vs->[$j]->[$k]: ',"\n",sprintf('%064b',$Vs->[$j]->[$k]),"\n" if $VERBOSE;
-
-        print STDERR '    ~($S + $u + $carry): ',"\n",sprintf('%064b',~($S + $u + $carry)),"\n" if $VERBOSE;
-        print STDERR '    ($S & $u): ',"\n",sprintf('%064b',($S & $u)),"\n" if $VERBOSE;
-        print STDERR '    ($S | $u): ',"\n",sprintf('%064b',~($S | $u)),"\n";
-        #$carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> 63; # TODO: $width-1
-        $carry = (($S & $u) | (($S | $u) & ($S + $u + $carry))) >> ($width-1); # $width-1
-        print STDERR '    $carry: ',"\n",sprintf('%064b',$carry),"\n" if $VERBOSE;
+    else {
+      unless (
+         $j
+         && exists $Vs->[$j-1]
+         && ~$Vs->[$j-1] & (1<<$i)
+      ) {
+         unshift @lcs, [$i,$j];
+         $i--;
       }
-    }
-
-=pod
-
-    a_s = &a_strings[index][0];
-    bottombit = 1;
-    for (j = 0; j < nwords; j++) {
-        y = *(last++);
-        x =  y | *(a_s++);
-        top_borrow = (y >> (WLEN - 1)) & 0x1;
-        y = ((y << 1) | bottombit);
-        if (x < y)
-            top_borrow = 1;
-        *(cur++) = x & ((x - y) ^ x);
-        bottombit = top_borrow;
-
-=cut
-
-    # recover alignment
-    my $i = $amax;
-    my $j = $bmax;
-
-    while ($i >= $amin && $j >= $bmin) {
-      my $k = $i / $width;
-      if ($Vs->[$j]->[$k] & (1<<($i % $width))) {
-        $i--;
-      }
-      else {
-        unless (
-           $j
-           && exists $Vs->[$j-1]->[$k]
-           && ~$Vs->[$j-1]->[$k] & (1<<($i % $width))
-        ) {
-           unshift @lcs, [$i,$j];
-           $i--;
-        }
-        $j--;
-      }
+      $j--;
     }
   }
 
