@@ -1,6 +1,7 @@
 requires 'perl', '5.010001';
 
-# requires 'Some::Module', 'VERSION';
+requires 'Math::BigInt', '1.999818';
+recommends 'Math::BigInt::GMP', '1.6007';
 
 on test => sub {
   requires 'Test::More', '0.88';
