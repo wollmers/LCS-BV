@@ -153,12 +153,12 @@ sub LCS {
     else {
       my $m = $j > 0 ? exists $Vs->[$j-1] : 0;
       if ($m) {
-          $m = !($Vs->[$j - 1]->copy()->bnot()->band($mask)->is_zero());
+        $m = !($Vs->[$j - 1]->copy()->bnot()->band($mask)->is_zero());
       }
       unless ($m) {
-         unshift @lcs, [$i,$j];
-         $i--;
-         $mask->brsft(1);
+        unshift @lcs, [$i,$j];
+        $i--;
+        $mask->brsft(1);
       }
       $j--;
     }
