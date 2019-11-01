@@ -103,19 +103,20 @@ sub LCS {
   my $positions;
   my @lcs;
 
+  my $mask = Math::BigInt->bone();
+  $mask->blsft($amin);
   for ($amin..$amax) {
     my $p = $a->[$_];
-    my $mask = Math::BigInt->bone();
-    $mask->blsft($_);
     unless (defined $positions->{$p}) {
       $positions->{$p} = Math::BigInt->new(0);
     }
     $positions->{$p}->bior($mask);
+    $mask->blsft(1);
   }
 
   # cannot do a simple NOT with bnot here as it will turn the integer into
   # a negative value
-  my $S = Math::BigInt->new(1);
+  my $S = Math::BigInt->bone();
   $S->blsft($amax + 1);
   $S--;
 
@@ -147,7 +148,7 @@ sub LCS {
   my $j = $bmax;
 
   while ($i >= $amin && $j >= $bmin) {
-    my $mask = Math::BigInt->bone();
+    $mask = Math::BigInt->bone();
     $mask->blsft($i);
     my $Vm = $Vs->[$j]->copy();
     $Vm->band($mask);
