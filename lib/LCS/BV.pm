@@ -5,7 +5,6 @@ use strict;
 use warnings;
 our $VERSION = '0.06';
 #use utf8;
-use Data::Dumper;
 
 sub new {
   my $class = shift;
@@ -88,8 +87,7 @@ sub _count_bits {
 sub LCS {
   my ($self, $a, $b) = @_;
 
-  use bigint;
-  no warnings 'portable'; # for 0xffffffffffffffff
+  use Math::BigInt lib => 'GMP';
 
   my ($amin, $amax, $bmin, $bmax) = (0, $#$a, 0, $#$b);
 
@@ -105,19 +103,43 @@ sub LCS {
   my $positions;
   my @lcs;
 
-  $positions->{$a->[$_]} |= 1 << $_ for $amin..$amax;
+  for ($amin..$amax) {
+    my $p = $a->[$_];
+    my $mask = Math::BigInt->bone();
+    $mask->blsft($_);
+    unless (defined $positions->{$p}) {
+      $positions->{$p} = Math::BigInt->new(0);
+    }
+    $positions->{$p}->bior($mask);
+  }
 
-  my $S = ~0;
+  # cannot do a simple NOT with bnot here as it will turn the integer into
+  # a negative value
+  my $S = Math::BigInt->new(1);
+  $S->blsft($amax + 1);
+  $S--;
+
+  my $b0 = Math::BigInt->new(0);
+  $b0->accuracy($S->accuracy());
 
   my $Vs = [];
   my ($y,$u);
 
   # outer loop
   for my $j ($bmin..$bmax) {
-    $y = $positions->{$b->[$j]} // 0;
-    $u = $S & $y;               # [Hyy04]
-    $S = ($S + $u) | ($S - $u); # [Hyy04]
-    $Vs->[$j] = $S;
+    if (defined $positions->{$b->[$j]}) {
+      $y = $positions->{$b->[$j]}->copy();
+    }
+    else {
+      $y = $b0->copy();
+    }
+    # [Hyy04]
+    $u = $S->copy();
+    $u->band($y);
+    my $S_int = $S->as_int();
+    $S = $S_int + $u;
+    $S->bior($S_int - $u);
+    $Vs->[$j] = $S->copy();
   }
 
   # recover alignment
@@ -125,14 +147,25 @@ sub LCS {
   my $j = $bmax;
 
   while ($i >= $amin && $j >= $bmin) {
-    if ($Vs->[$j] & (1<<$i)) {
+    my $mask = Math::BigInt->bone();
+    $mask->blsft($i);
+    my $Vm = $Vs->[$j]->copy();
+    $Vm->band($mask);
+    if ($Vm) {
       $i--;
     }
     else {
+      my $existing = exists $Vs->[$j-1];
+      my $Vn;
+      if ($existing) {
+        $Vn = $Vs->[$j - 1]->copy();
+        $Vn->bnot();
+        $Vn->band($mask);
+      }
       unless (
          $j
-         && exists $Vs->[$j-1]
-         && ~$Vs->[$j-1] & (1<<$i)
+         && $existing
+         && $Vn
       ) {
          unshift @lcs, [$i,$j];
          $i--;
