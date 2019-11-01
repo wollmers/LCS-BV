@@ -135,8 +135,10 @@ sub LCS {
       $y = $b0;
     }
     # [Hyy04]
+    # $u = $S & $y
     $u = $S->copy();
     $u->band($y);
+    # $S = ($S + $u) | ($S - $u)
     my $S_int = $S->as_int();
     $S = $S_int + $u;
     $S->bior($S_int - $u);
@@ -161,18 +163,14 @@ sub LCS {
       $mask->brsft(1);
     }
     else {
-      my $existing = exists $Vs->[$j-1];
-      my $Vn;
-      if ($existing) {
-        $Vn = $Vs->[$j - 1]->copy();
+      my $m = $j > 0 ? exists $Vs->[$j-1] : 0;
+      if ($m) {
+        my $Vn = $Vs->[$j - 1]->copy();
         $Vn->bnot();
         $Vn->band($mask);
+        $m = !$Vn->is_zero();
       }
-      unless (
-         $j
-         && $existing
-         && $Vn
-      ) {
+      unless ($m) {
          unshift @lcs, [$i,$j];
          $i--;
          $mask->brsft(1);
