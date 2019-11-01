@@ -128,12 +128,7 @@ sub LCS {
 
   # outer loop
   for my $j ($bmin..$bmax) {
-    if (defined $positions->{$b->[$j]}) {
-      $y = $positions->{$b->[$j]};
-    }
-    else {
-      $y = $b0;
-    }
+    $y = $positions->{$b->[$j]} // $b0;
     # [Hyy04]
     # $u = $S & $y
     $u = $S->copy();
