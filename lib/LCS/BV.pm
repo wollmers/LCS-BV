@@ -147,13 +147,18 @@ sub LCS {
   my $i = $amax;
   my $j = $bmax;
 
+  # really: $mask = 1 << $i
+  # this is faster than creating a new object with value = 1 and then shift
+  $mask->bxor($mask);
+  $mask->binc();
+  $mask->blsft($i);
+
   while ($i >= $amin && $j >= $bmin) {
-    $mask = Math::BigInt->bone();
-    $mask->blsft($i);
     my $Vm = $Vs->[$j]->copy();
     $Vm->band($mask);
-    if ($Vm) {
+    unless ($Vm->is_zero()) {
       $i--;
+      $mask->brsft(1);
     }
     else {
       my $existing = exists $Vs->[$j-1];
@@ -170,6 +175,7 @@ sub LCS {
       ) {
          unshift @lcs, [$i,$j];
          $i--;
+         $mask->brsft(1);
       }
       $j--;
     }
