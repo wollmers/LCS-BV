@@ -130,7 +130,8 @@ sub LCS {
     # $u = $S & $y
     $u = $S->copy()->band($y);
     # $S = ($S + $u) | ($S - $u)
-    $S->badd($u)->bior($S->copy->bsub($u));
+    my $Smu = $S->copy->bsub($u);
+    $S->badd($u)->bior($Smu);
     $Vs->[$j] = $S->copy();
   }
 
