@@ -118,8 +118,7 @@ sub LCS {
   # a negative value
   my $S = Math::BigInt->bone()->blsft($amax + 1)->bdec();
 
-  my $b0 = Math::BigInt->new(0);
-  $b0->accuracy($S->accuracy());
+  my $b0 = Math::BigInt->new(0)->accuracy($S->accuracy());
 
   my $Vs = [];
   my ($y,$u);
@@ -131,8 +130,7 @@ sub LCS {
     # $u = $S & $y
     $u = $S->copy()->band($y);
     # $S = ($S + $u) | ($S - $u)
-    my $S_int = $S->as_int();
-    $S->badd($u)->bior($S_int - $u);
+    $S->badd($u)->bior($S->copy->bsub($u));
     $Vs->[$j] = $S->copy();
   }
 
