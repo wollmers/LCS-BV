@@ -116,9 +116,7 @@ sub LCS {
 
   # cannot do a simple NOT with bnot here as it will turn the integer into
   # a negative value
-  my $S = Math::BigInt->bone();
-  $S->blsft($amax + 1);
-  $S--;
+  my $S = Math::BigInt->bone()->blsft($amax + 1)->bdec();
 
   my $b0 = Math::BigInt->new(0);
   $b0->accuracy($S->accuracy());
@@ -131,12 +129,10 @@ sub LCS {
     $y = $positions->{$b->[$j]} // $b0;
     # [Hyy04]
     # $u = $S & $y
-    $u = $S->copy();
-    $u->band($y);
+    $u = $S->copy()->band($y);
     # $S = ($S + $u) | ($S - $u)
     my $S_int = $S->as_int();
-    $S = $S_int + $u;
-    $S->bior($S_int - $u);
+    $S->badd($u)->bior($S_int - $u);
     $Vs->[$j] = $S->copy();
   }
 
@@ -146,13 +142,10 @@ sub LCS {
 
   # really: $mask = 1 << $i
   # this is faster than creating a new object with value = 1 and then shift
-  $mask->bxor($mask);
-  $mask->binc();
-  $mask->blsft($i);
+  $mask->bxor($mask)->binc()->blsft($i);
 
   while ($i >= $amin && $j >= $bmin) {
-    my $Vm = $Vs->[$j]->copy();
-    $Vm->band($mask);
+    my $Vm = $Vs->[$j]->copy()->band($mask);
     unless ($Vm->is_zero()) {
       $i--;
       $mask->brsft(1);
@@ -160,10 +153,7 @@ sub LCS {
     else {
       my $m = $j > 0 ? exists $Vs->[$j-1] : 0;
       if ($m) {
-        my $Vn = $Vs->[$j - 1]->copy();
-        $Vn->bnot();
-        $Vn->band($mask);
-        $m = !$Vn->is_zero();
+          $m = !($Vs->[$j - 1]->copy()->bnot()->band($mask)->is_zero());
       }
       unless ($m) {
          unshift @lcs, [$i,$j];
