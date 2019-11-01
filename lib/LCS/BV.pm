@@ -87,7 +87,7 @@ sub _count_bits {
 sub LCS {
   my ($self, $a, $b) = @_;
 
-  use Math::BigInt lib => 'GMP';
+  use Math::BigInt try => 'GMP';
 
   my ($amin, $amax, $bmin, $bmax) = (0, $#$a, 0, $#$b);
 
