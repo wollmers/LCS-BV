@@ -1,6 +1,8 @@
 Revision history for LCS::BV
 
 {{$NEXT}}
+
+0.07  2019-11-03 15:00:37 CET
         - make it work for long sequencies
 
 0.06  2015-07-20 00:07:34 CEST
