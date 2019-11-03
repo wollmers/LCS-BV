@@ -1,6 +1,7 @@
 Revision history for LCS::BV
 
 {{$NEXT}}
+        - make it work for long sequencies
 
 0.06  2015-07-20 00:07:34 CEST
         - further optimization

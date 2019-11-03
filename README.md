@@ -35,6 +35,11 @@ than the used wordsize of the hardware (32 or 64 bits).
 
 ## METHODS
 
+- LLCS(\\@a,\\@b)
+
+    Return the length of a Longest Common Subsequence, taking two arrayrefs as method
+    arguments. It returns an integer.
+
 - LCS(\\@a,\\@b)
 
     Finds a Longest Common Subsequence, taking two arrayrefs as method
@@ -59,7 +64,7 @@ Helmut Wollmersdorfer <helmut.wollmersdorfer@gmail.com>
 
 # COPYRIGHT AND LICENSE
 
-Copyright 2014-2015 by Helmut Wollmersdorfer
+Copyright 2014-2019 by Helmut Wollmersdorfer
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
