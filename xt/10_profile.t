@@ -11,6 +11,7 @@ use LCS::BV;
 
 # export NYTPROF=addtimestamp=1:start=init;perl -d:NYTProf 10_profile.t
 # nytprofhtml -f nytprof.out.1437103846 -o nytprof.1437103846
+# or easiest: perl -d:NYTProf 10_profile.t; nytprofhtml
 
 my $examples = [
   ['ttatc__cg',
@@ -79,19 +80,32 @@ my $examples2 = [
 
 my @data3 = ([qw/a b d/ x 50], [qw/b a d c/ x 50]);
 
-if (0) {
-#for my $example (@$examples) {
-for my $example ($examples->[19]) {
+if (1) {
+for my $example (@$examples) {
+#for my $example ($examples->[19]) {
   my $a = $example->[0];
   my $b = $example->[1];
   my @a = $a =~ /([^_])/g;
   my @b = $b =~ /([^_])/g;
 
-  LCS::BV->LCS(\@a,\@b);
+  LCS::BV->LLCS(\@a,\@b);
 
 }
 }
 
 if (1) {
-  LCS::BV->LCS(@data3);
+for my $example (@$examples) {
+#for my $example ($examples->[19]) {
+  my $a = $example->[0];
+  my $b = $example->[1];
+  my @a = $a =~ /([^_])/g;
+  my @b = $b =~ /([^_])/g;
+
+  LCS::BV->LLCS(\@a,\@b);
+
+}
+}
+
+if (1) {
+  LCS::BV->LLCS(@data3);
 }
