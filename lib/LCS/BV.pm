@@ -63,38 +63,38 @@ sub LLCS {
     return $amin + _count_bits(~$v) + scalar(@$a) - ($amax+1);
   }
   else {
-  $positions->{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
+    $positions->{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
 
-  my $S;
-  my $Vs = [];      # $Vs->[$k] = bits;
+    my $S;
+    my $Vs = [];      # $Vs->[$k] = bits;
 
-  my ($p, $u, $carry);
+    my ($p, $u, $carry);
 
-  my $kmax = ($amax+1) / $width;
-  $kmax++ if (($amax+1) % $width);
+    my $kmax = ($amax+1) / $width;
+    $kmax++ if (($amax+1) % $width);
 
-  for (my $k=0; $k < $kmax; $k++ ) { $Vs->[$k] = ~0; }
+    for (my $k=0; $k < $kmax; $k++ ) { $Vs->[$k] = ~0; }
 
-  for my $j ($bmin..$bmax) {
-    $carry = 0;
-    for (my $k=0; $k < $kmax; $k++ ) {
+    for my $j ($bmin..$bmax) {
+      $carry = 0;
+      for (my $k=0; $k < $kmax; $k++ ) {
         #$S = (exists($Vs->[$k])) ? $Vs->[$k] : ~0;
         $S = $Vs->[$k];
         $p = $positions->{$b->[$j]}->[$k] // 0;
         $u = $S & $p;             # [Hyy04]
         $Vs->[$k] = ($S + $u + $carry) | ($S - $u);
         $carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> ($width-1) & 1;
+      }
     }
-  }
 
-  my $bitcount = 0;
+    my $bitcount = 0;
 
-  if (@$Vs) {
-    for my $k ( @{$Vs} ) {
-      $bitcount += _count_bits(~$k);
+    if (@$Vs) {
+      for my $k ( @{$Vs} ) {
+        $bitcount += _count_bits(~$k);
+      }
     }
-  }
-  return $amin + $bitcount + scalar(@$a) - ($amax+1);
+    return $amin + $bitcount + scalar(@$a) - ($amax+1);
   }
 }
 
@@ -219,11 +219,25 @@ sub _count_bits {
   use integer;
   #no warnings 'portable'; # for 0xffffffffffffffff
 
-  $v = $v - (($v >> 1) & 0x5555555555555555);
-  $v = ($v & 0x3333333333333333) + (($v >> 2) & 0x3333333333333333);
-  # (bytesof($v) -1) * bitsofbyte = (8-1)*8 = 56 ----------------------vv
-  $v = (($v + ($v >> 4) & 0x0f0f0f0f0f0f0f0f) * 0x0101010101010101) >> 56;
-  return $v;
+  if ($width == 64) {
+    $v = $v - (($v >> 1) & 0x5555555555555555);
+    $v = ($v & 0x3333333333333333) + (($v >> 2) & 0x3333333333333333);
+    # (bytesof($v) -1) * bitsofbyte = (8-1)*8 = 56 ----------------------vv
+    $v = (($v + ($v >> 4) & 0x0f0f0f0f0f0f0f0f) * 0x0101010101010101) >> 56;
+    return $v;
+  }
+  else {
+    #$v = $v - (($v >> 1) & 0x55555555);
+    #$v = ($v & 0x33333333) + (($v >> 2) & 0x33333333);
+    ## (bytesof($v) -1) * bitsofbyte = (4-1)*8 = 24 ------vv
+    #$v = (($v + ($v >> 4) & 0x0f0f0f0f) * 0x01010101) >> 24
+
+    my $c; # count
+    for ($c = 0; $v; $c++) {
+      $v &= $v - 1; # clear the least significant bit set
+    }
+    return $c;
+  }
 }
 
 1;

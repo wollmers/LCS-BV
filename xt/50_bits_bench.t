@@ -115,7 +115,7 @@ sub best {
 }
 
 
-if (0) {
+if (1) {
   for my $test (@{$tests}) {
     print $test->[0],"\n";
     my $bits = $test->[1];
@@ -139,4 +139,48 @@ if (0) {
   }
 }
 
+=pod
+
+https://groups.google.com/forum/?hl=en#!msg/comp.graphics.algorithms/ZKSegl2sr4c/QYTwoPSx30MJ
+Fast bitcount:
+
+        #define BX_(x)                ((x) - (((x)>>1)&0x77777777)                \
+                             - (((x)>>2)&0x33333333)                \
+                             - (((x)>>3)&0x11111111))
+
+        #define BITCOUNT(x)        (((BX_(x)+(BX_(x)>>4)) & 0x0F0F0F0F) % 255)
+
+
+int bitcount (long x)
+    {static long b[] = {0x55555555, 0x33333333, 0x0f0f0f0f, 0x00ff00ff, 0x0000ffff};
+     static int s[] = {1, 2, 4, 8, 16};
+     int i;
+     for (i = 0; i < 5; i++)
+        x = ((x >> s[i]) & b[i]) + (x & b[i]);
+     return ((int) x);
+    }
+
+int Bits(int w)
+{
+  int n;
+  for (n=0; w!=0; n++)
+    w&=w-1;
+  return n;
+}
+
+https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
+
+The best method for counting bits in a 32-bit integer v is the following:
+
+v = v - ((v >> 1) & 0x55555555);                    // reuse input as temporary
+v = (v & 0x33333333) + ((v >> 2) & 0x33333333);     // temp
+c = ((v + (v >> 4) & 0xF0F0F0F) * 0x1010101) >> 24; // count
+The best bit counting method takes only 12 operations, which is the same as the lookup-table method, but avoids the memory and potential cache misses of a table. It is a hybrid between the purely parallel method above and the earlier methods using multiplies (in the section on counting bits with 64-bit instructions), though it doesn't use 64-bit instructions. The counts of bits set in the bytes is done in parallel, and the sum total of the bits set in the bytes is computed by multiplying by 0x1010101 and shifting right 24 bits.
+
+A generalization of the best bit counting method to integers of bit-widths upto 128 (parameterized by type T) is this:
+
+v = v - ((v >> 1) & (T)~(T)0/3);                           // temp
+v = (v & (T)~(T)0/15*3) + ((v >> 2) & (T)~(T)0/15*3);      // temp
+v = (v + (v >> 4)) & (T)~(T)0/255*15;                      // temp
+c = (T)(v * ((T)~(T)0/255)) >> (sizeof(T) - 1) * CHAR_BIT; // count
 
