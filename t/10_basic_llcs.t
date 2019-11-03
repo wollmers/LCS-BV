@@ -103,10 +103,15 @@ my $examples2 = [
     'a!Z'],
 ];
 
+my $examples3 = [
+  [ 'a_',
+    'aa' ],
+  [ '_b_',
+    'abb' ],
+];
 
 if (1) {
 for my $example (@$examples) {
-#for my $example ($examples->[3]) {
   my $a = $example->[0];
   my $b = $example->[1];
   my @a = $a =~ /([^_])/g;
@@ -121,9 +126,8 @@ for my $example (@$examples) {
 }
 }
 
-if (0) {
+if (1) {
 for my $example (@$examples2) {
-#for my $example ($examples->[3]) {
   my $a = $example->[0];
   my $b = $example->[1];
   my @a = $a =~ /([^_])/g;
@@ -139,16 +143,93 @@ for my $example (@$examples2) {
 }
 }
 
+
+if (1) {
+for my $example (@$examples3) {
+  my $a = $example->[0];
+  my $b = $example->[1];
+  my @a = $a =~ /([^_])/g;
+  my @b = $b =~ /([^_])/g;
+
+  is(
+    LCS::BV->LLCS(\@a,\@b),
+    LCS->LLCS(\@a,\@b),
+
+    "$a, $b -> " . LCS::BV->LLCS(\@a,\@b)
+  );
+
+}
+}
+
+if (1) {
+my $prefix = 'a';
+my $infix  = 'b';
+my $suffix = 'c';
+
+my $max_length = 2;
+
+for my $prefix_length1 (0..$max_length) {
+  for my $infix_length1 (0..$max_length) {
+    for my $suffix_length1 (0..$max_length) {
+      my $a = $prefix x $prefix_length1 . $infix x $infix_length1 . $suffix x $suffix_length1;
+      my @a = split(//,$a);
+      my $m = scalar @a;
+      for my $prefix_length2 (0..$max_length) {
+        for my $infix_length2 (0..$max_length) {
+          for my $suffix_length2 (0..$max_length) {
+
+      my $b = $prefix x $prefix_length2 . $infix x $infix_length2 . $suffix x $suffix_length2;
+      my @b = split(//,$b);
+      my $n = scalar @b;
+
+  is(
+    LCS::BV->LLCS(\@a,\@b),
+    LCS->LLCS(\@a,\@b),
+
+    "[$a] m: $m, [$b] n: $n -> " . LCS->LLCS(\@a,\@b)
+  );
+        }
+    }
+  }
+      }
+    }
+  }
+}
+
+if (1) {
+my $string1 = 'abd';
+my $string2 = 'badc';
+my @base_lengths = (16, 32, 64, 128, 256);
+# int(rand(10))
+
+for my $base_length1 (@base_lengths) {
+  my $mult1 = int($base_length1/length($string1)) + 1;
+    my @a = split(//,$string1 x $mult1);
+    my $m = scalar @a;
+    for my $base_length2 (@base_lengths) {
+      my $mult2 = int($base_length2/length($string2)) + 1;
+      my @b = split(//,$string2 x $mult2);
+      my $n = scalar @b;
+  is(
+    LCS::BV->LLCS(\@a,\@b),
+    LCS->LLCS(\@a,\@b),
+
+    "[$string1 x $mult1] m: $m, [$string2 x $mult2] n: $n -> " . LCS->LLCS(\@a,\@b)
+  );
+
+    }
+}
+}
 
 
 my @data3 = ([qw/a b d/ x 50], [qw/b a d c/ x 50]);
 
-if (0) {
+if (1) {
   is(
     LCS::BV->LLCS(@data3),
     LCS->LLCS(@data3),
 
-    '[qw/a b d/ x 50], [qw/b a d c/ x 50] -> ' . LCS::BV->LLCS(@data3)
+    '[qw/a b d/ x 50], [qw/b a d c/ x 50] -> ' . LCS->LLCS(@data3)
   );
 
 }

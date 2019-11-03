@@ -21,7 +21,7 @@ use_ok($class);
 
 my $object = new_ok($class);
 
-if (1) {
+if (0) {
 ok($object->new());
 ok($object->new(1,2));
 ok($object->new({}));
@@ -77,7 +77,7 @@ my $examples = [
     're'],
   [ 'abcdefg_',
     '_bcdefgh'],
-  [ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVY_',
+  [ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVY_', # l=52
     '_bcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYZ'],
   [ 'aabbcc',
     'abc'],
@@ -101,12 +101,13 @@ my $examples2 = [
     'abcdefghijklmnopqrstuvwxyz012345678!9!"$%&/()=?ABCDEFGHIJKLMNOPQRSTUVYZ'],
   [ 'aaabcdefghijklmnopqrstuvwxyz012345678_9!"$%&/()=?ABCDEFGHIJKLMNOPQRSTUVYZZZ',
     'a!Z'],
-  [ ('_' x 100) . '0123456789abcdef' . ('!@#$%^&*()' x 100),
-    'abc' ],
-  [ '__0',
-    ('_' x 100) . '0123456789abcdef' . ('!@#$%^&*()' x 100) ],
-  [ ('_' x 8) . ('0123456789abcdef' x 5) . ('!@#$%^&*()' x 2),
-    ('_' x 7) . ('0123456789abcdef' x 5) ],
+];
+
+my $examples3 = [
+  [ 'a_',
+    'aa' ],
+  [ '_b_',
+    'abb' ],
 ];
 
 
@@ -133,28 +134,6 @@ for my $example (@$examples) {
 }
 }
 
-if (1) {
-for my $example (@$examples) {
-#for my $example ($examples->[3]) {
-  my $a = $example->[1];
-  my $b = $example->[0];
-  my @a = $a =~ /([^_])/g;
-  my @b = $b =~ /([^_])/g;
-
-  cmp_deeply(
-    LCS::BV->LCS(\@a,\@b),
-    any(@{LCS->allLCS(\@a,\@b)} ),
-
-    "$a, $b"
-  );
-  if (0) {
-    $Data::Dumper::Deepcopy = 1;
-    print STDERR 'allLCS: ',Data::Dumper->Dump(LCS->allLCS(\@a,\@b)),"\n";
-
-    print STDERR 'LCS: ',Dumper(LCS::BV->LCS(\@a,\@b)),"\n";
-  }
-}
-}
 
 if (1) {
 for my $example (@$examples2) {
@@ -179,10 +158,10 @@ for my $example (@$examples2) {
 }
 
 if (1) {
-for my $example (@$examples2) {
+for my $example (@$examples3) {
 #for my $example ($examples->[3]) {
-  my $a = $example->[1];
-  my $b = $example->[0];
+  my $a = $example->[0];
+  my $b = $example->[1];
   my @a = $a =~ /([^_])/g;
   my @b = $b =~ /([^_])/g;
 
@@ -197,6 +176,66 @@ for my $example (@$examples2) {
     print STDERR 'allLCS: ',Data::Dumper->Dump(LCS->allLCS(\@a,\@b)),"\n";
     print STDERR 'LCS: ',Dumper(LCS::BV->LCS(\@a,\@b)),"\n";
   }
+}
+}
+
+if (1) {
+my $prefix = 'a';
+my $infix  = 'b';
+my $suffix = 'c';
+
+my $max_length = 2;
+
+for my $prefix_length1 (0..$max_length) {
+  for my $infix_length1 (0..$max_length) {
+    for my $suffix_length1 (0..$max_length) {
+      my $a = $prefix x $prefix_length1 . $infix x $infix_length1 . $suffix x $suffix_length1;
+      my @a = split(//,$a);
+      my $m = scalar @a;
+      for my $prefix_length2 (0..$max_length) {
+        for my $infix_length2 (0..$max_length) {
+          for my $suffix_length2 (0..$max_length) {
+
+      my $b = $prefix x $prefix_length2 . $infix x $infix_length2 . $suffix x $suffix_length2;
+      my @b = split(//,$b);
+      my $n = scalar @b;
+
+  is(
+    scalar @{LCS::BV->LCS(\@a,\@b)},
+    LCS->LLCS(\@a,\@b),,
+
+    "[$a] m: $m, [$b] n: $n -> " . LCS->LLCS(\@a,\@b)
+  );
+        }
+    }
+  }
+      }
+    }
+  }
+}
+
+if (1) {
+my $string1 = 'abd';
+my $string2 = 'badc';
+my @base_lengths = (16, 32, 64, 128, 256);
+# int(rand(10))
+
+for my $base_length1 (@base_lengths) {
+  my $mult1 = int($base_length1/length($string1)) + 1;
+    my @a = split(//,$string1 x $mult1);
+    my $m = scalar @a;
+    for my $base_length2 (@base_lengths) {
+      my $mult2 = int($base_length2/length($string2)) + 1;
+      my @b = split(//,$string2 x $mult2);
+      my $n = scalar @b;
+  is(
+    scalar @{LCS::BV->LCS(\@a,\@b)},
+    LCS->LLCS(\@a,\@b),
+
+    "[$string1 x $mult1] m: $m, [$string2 x $mult2] n: $n -> " . LCS->LLCS(\@a,\@b)
+  );
+
+    }
 }
 }
 
@@ -216,13 +255,13 @@ if (0) {
   }
 }
 
-if (0) {
+if (1) {
   is(
     scalar @{LCS::BV->LCS(@data3)},
     LCS->LLCS(@data3),
     '[qw/a b d/ x 50], [qw/b a d c/ x 50] -> ' . LCS->LLCS(@data3)
   );
-  if (1) {
+  if (0) {
     $Data::Dumper::Deepcopy = 1;
     print STDERR 'LCS->LCS: ',Dumper(LCS->LCS(@data3)),"\n";
     print STDERR 'LCS::BV->LCS: ',Dumper(LCS::BV->LCS(@data3)),"\n";
@@ -230,26 +269,5 @@ if (0) {
 }
 
 
-if (0) {
-  my $rep1 = 33;
-  my $rep2 = 2;
-  my $a = 'abcd';
-  my $b = 'bc';
-  my @a = $a =~ /([^_])/g;
-  my @b = $b =~ /([^_])/g;
-  #my @data4 = ([qw/a b d/ x $rep], [qw/b a d c/ x $rep]);
-  my @data4 = ([(@a) x $rep1], [(@b) x $rep2]);
-
-  is(
-    scalar @{LCS::BV->LCS(@data4)},
-    LCS->LLCS(@data4),
-    "[$a x $rep1], [$b x $rep2] -> " . LCS->LLCS(@data4)
-  );
-  if (0) {
-    $Data::Dumper::Deepcopy = 1;
-    #print STDERR 'LCS->LCS: ',Dumper(LCS->LCS(@data4)),"\n";
-    #print STDERR 'LCS::BV->LCS: ',Dumper(LCS::BV->LCS(@data4)),"\n";
-  }
-}
 
 done_testing;

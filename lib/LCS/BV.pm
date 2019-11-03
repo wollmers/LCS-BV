@@ -5,7 +5,10 @@ use strict;
 use warnings;
 our $VERSION = '0.06';
 #use utf8;
-use Data::Dumper;
+
+our $width = int 0.999+log(~0)/log(2);
+
+no warnings 'portable'; # for 0xffffffffffffffff
 
 sub new {
   my $class = shift;
@@ -22,10 +25,18 @@ sub LLCS {
   my ($self,$a,$b) = @_;
 
   use integer;
-  no warnings 'portable'; # for 0xffffffffffffffff
+  #no warnings 'portable'; # for 0xffffffffffffffff
+
+  # TODO: maybe faster, if we have fewer expensive iterations
+  #if (@$a < @$b) {
+  #  my $temp = $a;
+  #  $a = $b;
+  #  $b = $temp;
+  #}
 
   my ($amin, $amax, $bmin, $bmax) = (0, $#$a, 0, $#$b);
 
+  #if (1) {
   while ($amin <= $amax and $bmin <= $bmax and $a->[$amin] eq $b->[$bmin]) {
     $amin++;
     $bmin++;
@@ -34,62 +45,65 @@ sub LLCS {
     $amax--;
     $bmax--;
   }
+  #}
 
   my $positions;
-  $positions->{$a->[$_]} |= 1 << $_ for $amin..$amax;
 
-  my $v = ~0;
-  my ($p,$u);
+  if (1 && $amax < $width ) {
+    $positions->{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
+
+    my $v = ~0;
+    my ($p,$u);
+
+    for ($bmin..$bmax) {
+      $p = $positions->{$b->[$_]} // 0;
+      $u = $v & $p;
+      $v = ($v + $u) | ($v - $u);
+    }
+    return $amin + _count_bits(~$v) + scalar(@$a) - ($amax+1);
+  }
+  else {
+  $positions->{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
+
+  my $S;
+  my $Vs = [];      # $Vs->[$k] = bits;
+
+  my ($p, $u, $carry);
+
+  my $kmax = ($amax+1) / $width;
+  $kmax++ if (($amax+1) % $width);
+
+  for (my $k=0; $k < $kmax; $k++ ) { $Vs->[$k] = ~0; }
 
   for my $j ($bmin..$bmax) {
-    $p = $positions->{$b->[$j]} // 0;
-    $u = $v & $p;
-    $v = ($v + $u) | ($v - $u);
+    $carry = 0;
+    for (my $k=0; $k < $kmax; $k++ ) {
+        #$S = (exists($Vs->[$k])) ? $Vs->[$k] : ~0;
+        $S = $Vs->[$k];
+        $p = $positions->{$b->[$j]}->[$k] // 0;
+        $u = $S & $p;             # [Hyy04]
+        $Vs->[$k] = ($S + $u + $carry) | ($S - $u);
+        $carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> ($width-1) & 1;
+    }
   }
-  $v = ~$v;
 
-  #$v = $v - (($v >> 1) & 0x5555555555555555);
-  #$v = ($v & 0x3333333333333333) + (($v >> 2) & 0x3333333333333333);
-  ## (bytesof($v) -1) * bitsofbyte = (8-1)*8 = 56 ----------------------vv
-  #$v = (($v + ($v >> 4) & 0x0f0f0f0f0f0f0f0f) * 0x0101010101010101) >> 56;
-  #return $amin + $v + scalar(@$a) - ($amax+1);
+  my $bitcount = 0;
 
-  return $amin + _count_bits($v) + scalar(@$a) - ($amax+1);
+  if (@$Vs) {
+    for my $k ( @{$Vs} ) {
+      $bitcount += _count_bits(~$k);
+    }
+  }
+  return $amin + $bitcount + scalar(@$a) - ($amax+1);
+  }
 }
-
-
-#int count_bits(uint64_t bits) {
-#  bits = (bits & 0x5555555555555555ull) + ((bits & 0xaaaaaaaaaaaaaaaaull) >> 1);
-#  bits = (bits & 0x3333333333333333ull) + ((bits & 0xccccccccccccccccull) >> 2);
-#  bits = (bits & 0x0f0f0f0f0f0f0f0full) + ((bits & 0xf0f0f0f0f0f0f0f0ull) >> 4);
-#  bits = (bits & 0x00ff00ff00ff00ffull) + ((bits & 0xff00ff00ff00ff00ull) >> 8);
-#  bits = (bits & 0x0000ffff0000ffffull) + ((bits & 0xffff0000ffff0000ull) >>16);
-#  return (bits & 0x00000000ffffffffull) + ((bits & 0xffffffff00000000ull) >>32);
-#}
-
-
-
-sub _count_bits {
-  my $v = shift;
-
-  use integer;
-  no warnings 'portable'; # for 0xffffffffffffffff
-
-  $v = $v - (($v >> 1) & 0x5555555555555555);
-  $v = ($v & 0x3333333333333333) + (($v >> 2) & 0x3333333333333333);
-  # (bytesof($v) -1) * bitsofbyte = (8-1)*8 = 56 ----------------------vv
-  $v = (($v + ($v >> 4) & 0x0f0f0f0f0f0f0f0f) * 0x0101010101010101) >> 56;
-  return $v;
-}
-
-
 
 
 sub LCS {
   my ($self, $a, $b) = @_;
 
-  use bigint;
-  no warnings 'portable'; # for 0xffffffffffffffff
+  use integer;
+  #no warnings 'portable'; # for 0xffffffffffffffff
 
   my ($amin, $amax, $bmin, $bmax) = (0, $#$a, 0, $#$b);
 
@@ -102,42 +116,93 @@ sub LCS {
     $bmax--;
   }
 
+
   my $positions;
   my @lcs;
 
-  $positions->{$a->[$_]} |= 1 << $_ for $amin..$amax;
+  if ($amax < $width ) {
+    $positions->{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
 
-  my $S = ~0;
+    my $S = ~0;
 
-  my $Vs = [];
-  my ($y,$u);
+    my $Vs = [];
+    my ($y,$u);
 
-  # outer loop
-  for my $j ($bmin..$bmax) {
-    $y = $positions->{$b->[$j]} // 0;
-    $u = $S & $y;               # [Hyy04]
-    $S = ($S + $u) | ($S - $u); # [Hyy04]
-    $Vs->[$j] = $S;
-  }
-
-  # recover alignment
-  my $i = $amax;
-  my $j = $bmax;
-
-  while ($i >= $amin && $j >= $bmin) {
-    if ($Vs->[$j] & (1<<$i)) {
-      $i--;
+    # outer loop
+    for my $j ($bmin..$bmax) {
+      $y = $positions->{$b->[$j]} // 0;
+      $u = $S & $y;               # [Hyy04]
+      $S = ($S + $u) | ($S - $u); # [Hyy04]
+      $Vs->[$j] = $S;
     }
-    else {
-      unless (
-         $j
-         && exists $Vs->[$j-1]
-         && ~$Vs->[$j-1] & (1<<$i)
-      ) {
-         unshift @lcs, [$i,$j];
-         $i--;
+
+    # recover alignment
+    my $i = $amax;
+    my $j = $bmax;
+
+    while ($i >= $amin && $j >= $bmin) {
+      if ($Vs->[$j] & (1<<$i)) {
+        $i--;
       }
-      $j--;
+      else {
+        unless (
+           $j
+           && exists $Vs->[$j-1]
+           && ~$Vs->[$j-1] & (1<<$i)
+        ) {
+           unshift @lcs, [$i,$j];
+           $i--;
+        }
+        $j--;
+      }
+    }
+  }
+  else {
+    $positions->{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
+
+    my $S;
+    my $Vs = [];
+    my ($y,$u,$carry);
+
+    my $kmax = ($amax+1) / $width;
+    $kmax++ if (($amax+1) % $width);
+
+    # outer loop
+    for my $j ($bmin..$bmax) {
+      for (my $k=0; $k < $kmax; $k++ ) { $Vs->[$j]->[$k] = ~0; }
+      $carry = 0;
+
+      for (my $k=0; $k < $kmax; $k++ ) {
+        $S = ($j > $bmin) ? $Vs->[$j-1]->[$k] : ~0;
+        $y = $positions->{$b->[$j]}->[$k] // 0;
+        $u = $S & $y;             # [Hyy04]
+
+        $Vs->[$j]->[$k] = ($S + $u + $carry) | ($S - $u);
+
+        $carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> ($width-1) & 1;
+      }
+    }
+
+    # recover alignment
+    my $i = $amax;
+    my $j = $bmax;
+
+    while ($i >= $amin && $j >= $bmin) {
+      my $k = $i / $width;
+      if ($Vs->[$j]->[$k] & (1<<($i % $width))) {
+        $i--;
+      }
+      else {
+        unless (
+           $j
+           && exists $Vs->[$j-1]->[$k]
+           && ~$Vs->[$j-1]->[$k] & (1<<($i % $width))
+        ) {
+           unshift @lcs, [$i,$j];
+           $i--;
+        }
+        $j--;
+      }
     }
   }
 
@@ -148,6 +213,18 @@ sub LCS {
   ];
 }
 
+sub _count_bits {
+  my $v = shift;
+
+  use integer;
+  #no warnings 'portable'; # for 0xffffffffffffffff
+
+  $v = $v - (($v >> 1) & 0x5555555555555555);
+  $v = ($v & 0x3333333333333333) + (($v >> 2) & 0x3333333333333333);
+  # (bytesof($v) -1) * bitsofbyte = (8-1)*8 = 56 ----------------------vv
+  $v = (($v + ($v >> 4) & 0x0f0f0f0f0f0f0f0f) * 0x0101010101010101) >> 56;
+  return $v;
+}
 
 1;
 
