@@ -52,7 +52,7 @@
          }
       }
    },
-   "release_status" : "stable",
+   "release_status" : "testing",
    "resources" : {
       "bugtracker" : {
          "web" : "https://github.com/wollmers/LCS-BV/issues"
@@ -64,7 +64,7 @@
          "web" : "https://github.com/wollmers/LCS-BV"
       }
    },
-   "version" : "0.08",
+   "version" : "0.09",
    "x_contributors" : [
       "ade ishs <ade@adeishs.com>",
       "Helmut Wollmersdorfer <helmut@wollmersdorfer.at>",
