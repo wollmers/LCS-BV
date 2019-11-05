@@ -36,7 +36,6 @@ sub LLCS {
 
   my ($amin, $amax, $bmin, $bmax) = (0, $#$a, 0, $#$b);
 
-  #if (1) {
   while ($amin <= $amax and $bmin <= $bmax and $a->[$amin] eq $b->[$bmin]) {
     $amin++;
     $bmin++;
@@ -45,58 +44,55 @@ sub LLCS {
     $amax--;
     $bmax--;
   }
-  #}
 
-  my $positions;
+  my %positions;
 
-  if (1 && $amax < $width ) {
-    $positions->{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
+  if ($amax < $width ) {
+    $positions{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
 
     my $v = ~0;
     my ($p,$u);
 
     for ($bmin..$bmax) {
-      $p = $positions->{$b->[$_]} // 0;
+      $p = $positions{$b->[$_]} // 0;
       $u = $v & $p;
       $v = ($v + $u) | ($v - $u);
     }
     return $amin + _count_bits(~$v) + scalar(@$a) - ($amax+1);
   }
   else {
-    $positions->{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
+    $positions{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
 
     my $S;
-    my $Vs = [];      # $Vs->[$k] = bits;
+    my @Vs = ();      # $Vs->[$k] = bits;
 
     my ($p, $u, $carry);
 
     my $kmax = ($amax+1) / $width;
     $kmax++ if (($amax+1) % $width);
 
-    for (my $k=0; $k < $kmax; $k++ ) { $Vs->[$k] = ~0; }
+    for (my $k=0; $k < $kmax; $k++ ) { $Vs[$k] = ~0; }
 
     for my $j ($bmin..$bmax) {
       $carry = 0;
       for (my $k=0; $k < $kmax; $k++ ) {
-        #$S = (exists($Vs->[$k])) ? $Vs->[$k] : ~0;
-        $S = $Vs->[$k];
-        $p = $positions->{$b->[$j]}->[$k] // 0;
+        $S = $Vs[$k];
+        $p = $positions{$b->[$j]}->[$k] // 0;
         $u = $S & $p;             # [Hyy04]
-        $Vs->[$k] = ($S + $u + $carry) | ($S - $u);
+        $Vs[$k] = ($S + $u + $carry) | ($S - $u);
         $carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> ($width-1) & 1;
       }
     }
 
     my $bitcount = 0;
 
-    if (@$Vs) {
-      for my $k ( @{$Vs} ) {
-        $bitcount += _count_bits(~$k);
-      }
+    for my $k ( @Vs ) {
+      $bitcount += _count_bits(~$k);
     }
     return $amin + $bitcount + scalar(@$a) - ($amax+1);
   }
 }
+
 
 
 sub LCS {
@@ -116,24 +112,23 @@ sub LCS {
     $bmax--;
   }
 
-
-  my $positions;
+  my %positions;
   my @lcs;
 
   if ($amax < $width ) {
-    $positions->{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
+    $positions{$a->[$_]} |= 1 << ($_ % $width) for $amin..$amax;
 
     my $S = ~0;
+    my @Vs = (~0);
 
-    my $Vs = [];
     my ($y,$u);
 
     # outer loop
     for my $j ($bmin..$bmax) {
-      $y = $positions->{$b->[$j]} // 0;
+      $y = $positions{$b->[$j]} // 0;
       $u = $S & $y;               # [Hyy04]
       $S = ($S + $u) | ($S - $u); # [Hyy04]
-      $Vs->[$j] = $S;
+      $Vs[$j] = $S;
     }
 
     # recover alignment
@@ -141,14 +136,12 @@ sub LCS {
     my $j = $bmax;
 
     while ($i >= $amin && $j >= $bmin) {
-      if ($Vs->[$j] & (1<<$i)) {
+      if ($Vs[$j] & (1<<$i)) {
         $i--;
       }
       else {
         unless (
-           $j
-           && exists $Vs->[$j-1]
-           && ~$Vs->[$j-1] & (1<<$i)
+           $j && ~$Vs[$j-1] & (1<<$i)
         ) {
            unshift @lcs, [$i,$j];
            $i--;
@@ -158,10 +151,10 @@ sub LCS {
     }
   }
   else {
-    $positions->{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
+    $positions{$a->[$_]}->[$_ / $width] |= 1 << ($_ % $width) for $amin..$amax;
 
     my $S;
-    my $Vs = [];
+    my @Vs = ([~0]);
     my ($y,$u,$carry);
 
     my $kmax = ($amax+1) / $width;
@@ -169,15 +162,15 @@ sub LCS {
 
     # outer loop
     for my $j ($bmin..$bmax) {
-      for (my $k=0; $k < $kmax; $k++ ) { $Vs->[$j]->[$k] = ~0; }
+      for (my $k=0; $k < $kmax; $k++ ) { $Vs[$j]->[$k] = ~0; }
       $carry = 0;
 
       for (my $k=0; $k < $kmax; $k++ ) {
-        $S = ($j > $bmin) ? $Vs->[$j-1]->[$k] : ~0;
-        $y = $positions->{$b->[$j]}->[$k] // 0;
+        $S = ($j > $bmin) ? $Vs[$j-1]->[$k] : ~0;
+        $y = $positions{$b->[$j]}->[$k] // 0;
         $u = $S & $y;             # [Hyy04]
 
-        $Vs->[$j]->[$k] = ($S + $u + $carry) | ($S - $u);
+        $Vs[$j]->[$k] = ($S + $u + $carry) | ($S - $u);
 
         $carry = (($S & $u) | (($S | $u) & ~($S + $u + $carry))) >> ($width-1) & 1;
       }
@@ -189,14 +182,12 @@ sub LCS {
 
     while ($i >= $amin && $j >= $bmin) {
       my $k = $i / $width;
-      if ($Vs->[$j]->[$k] & (1<<($i % $width))) {
+      if ($Vs[$j]->[$k] & (1<<($i % $width))) {
         $i--;
       }
       else {
         unless (
-           $j
-           && exists $Vs->[$j-1]->[$k]
-           && ~$Vs->[$j-1]->[$k] & (1<<($i % $width))
+           $j && ~$Vs[$j-1]->[$k] & (1<<($i % $width))
         ) {
            unshift @lcs, [$i,$j];
            $i--;
@@ -207,9 +198,9 @@ sub LCS {
   }
 
   return [
-    map([$_ => $_], 0 .. ($bmin-1)),
+    map([$_ => $_], 0 .. ($bmin-1)), ## no critic qw(BuiltinFunctions::RequireBlockMap)
     @lcs,
-    map([++$amax => $_], ($bmax+1) .. $#$b)
+    map([++$amax => $_], ($bmax+1) .. $#$b) ## no critic qw(BuiltinFunctions::RequireBlockMap)
   ];
 }
 

@@ -1,5 +1,8 @@
 #!perl
 
+use strict;
+use warnings;
+
 BEGIN {
   unless ($ENV{AUTHOR_TESTING}) {
     require Test::More;
@@ -23,5 +26,3 @@ else {
   ));
   all_pod_files_spelling_ok();
 }
-
-

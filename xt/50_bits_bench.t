@@ -26,9 +26,10 @@ if (1) {
   for my $test (@{$tests}) {
     is(kernighan($test->[1]),$test->[2],'kernighan '.$test->[0]);
     is(parallel1($test->[1]),$test->[2],'parallel1 '.$test->[0]);
-    is(parallel2($test->[1]),$test->[2],'parallel2 '.$test->[0]);
-    #is(parallel3($test->[1]),$test->[2],'parallel3 '.$test->[0]);
-    is(best($test->[1]),$test->[2],'best '.$test->[0]);
+    #is(parallel2($test->[1]),$test->[2],'parallel2 '.$test->[0]);
+    is(parallel3($test->[1]),$test->[2],'parallel3 '.$test->[0]);
+    is(best(     $test->[1]),$test->[2],'best '.$test->[0]);
+    #is(lookup(   $test->[1]),$test->[2],'lookup '.$test->[0]);
   }
   done_testing;
 }
@@ -102,6 +103,25 @@ sub parallel2 {
   return $v & 0x000000000000003f;
 }
 
+my @bits =  (
+  0x5555555555555555,
+  0x3333333333333333,
+  0x0f0f0f0f0f0f0f0f,
+  0x00ff00ff00ff00ff,
+  0x0000ffff0000ffff,
+  0x00000000ffffffff,
+);
+my @s    =  (1, 2, 4, 8, 16, 32);
+sub lookup {
+  my $v = shift;
+
+  my $i;
+  for ($i = 0; $i < 6; $i++) {
+     $v = (($v >> $s[$i]) & $bits[$i]) + ($v & $bits[$i]);
+  }
+  return $v;
+}
+
 sub best {
   my $v = shift;
 
@@ -117,7 +137,7 @@ sub best {
 
 if (1) {
   for my $test (@{$tests}) {
-    print $test->[0],"\n";
+    print "\n",$test->[0],"\n";
     my $bits = $test->[1];
     cmpthese( -1, {
        'kernighan' => sub {
@@ -129,12 +149,15 @@ if (1) {
         #'parallel2' => sub {
         #    parallel2($bits)
         #},
-        #'parallel3' => sub {
-        #    parallel3($bits)
-        #},
+        'parallel3' => sub {
+            parallel3($bits)
+        },
         'best' => sub {
             best($bits)
         },
+        #'lookup' => sub {
+        #    lookup($bits)
+        #},
     });
   }
 }

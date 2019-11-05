@@ -1,5 +1,8 @@
 #!perl
 
+use strict;
+use warnings;
+
 BEGIN {
   unless ($ENV{AUTHOR_TESTING}) {
     require Test::More;
@@ -20,5 +23,3 @@ else {
     forbid_cr => 1,
   });
 }
-
-
