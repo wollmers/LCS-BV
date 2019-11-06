@@ -319,7 +319,7 @@ Helmut Wollmersdorfer E<lt>helmut.wollmersdorfer@gmail.comE<gt>
 
 =encoding UTF-8
 
-Copyright 2014-2019 by Helmut Wollmersdorfer (Österreich)
+Copyright 2014-2019 by Helmut Wollmersdorfer
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
