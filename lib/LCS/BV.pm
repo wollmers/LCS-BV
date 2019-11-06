@@ -235,6 +235,10 @@ sub _count_bits {
 
 __END__
 
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 LCS::BV - Bit Vector (BV) implementation of the
@@ -313,7 +317,9 @@ Helmut Wollmersdorfer E<lt>helmut.wollmersdorfer@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2014-2019 by Helmut Wollmersdorfer
+=encoding UTF-8
+
+Copyright 2014-2019 by Helmut Wollmersdorfer (Österreich)
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
