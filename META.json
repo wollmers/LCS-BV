@@ -55,10 +55,10 @@
    "provides" : {
       "LCS::BV" : {
          "file" : "lib/LCS/BV.pm",
-         "version" : "0.10"
+         "version" : "0.11"
       }
    },
-   "release_status" : "stable",
+   "release_status" : "testing",
    "resources" : {
       "bugtracker" : {
          "web" : "https://github.com/wollmers/LCS-BV/issues"
@@ -70,7 +70,7 @@
          "web" : "https://github.com/wollmers/LCS-BV"
       }
    },
-   "version" : "0.10",
+   "version" : "0.11",
    "x_contributors" : [
       "ade ishs <ade@adeishs.com>",
       "Helmut Wollmersdorfer <helmut@wollmersdorfer.at>",
