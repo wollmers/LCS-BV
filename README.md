@@ -60,7 +60,7 @@ than the used wordsize of the hardware (32 or 64 bits).
 - LLCS\_prepared($positions,\\@a)
 
     Return the length of a Longest Common Subsequence, with one side prepared.
-    It returns an integer.
+    It returns an integer. It is two times faster than LLCS().
 
 ## EXPORT
 

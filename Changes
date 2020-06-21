@@ -1,6 +1,8 @@
 Revision history for LCS::BV
 
 {{$NEXT}}
+
+0.12  2020-06-21 17:35:55 CEST
         - improve coverage to 100%
 
 0.11  2020-06-21 08:01:50 CEST
