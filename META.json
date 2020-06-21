@@ -52,6 +52,12 @@
          }
       }
    },
+   "provides" : {
+      "LCS::BV" : {
+         "file" : "lib/LCS/BV.pm",
+         "version" : "0.09"
+      }
+   },
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {

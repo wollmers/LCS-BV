@@ -64,7 +64,7 @@ Helmut Wollmersdorfer <helmut.wollmersdorfer@gmail.com>
 
 # COPYRIGHT AND LICENSE
 
-Copyright 2014-2019 by Helmut Wollmersdorfer (Österreich)
+Copyright 2014-2019 by Helmut Wollmersdorfer
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

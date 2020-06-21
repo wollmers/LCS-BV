@@ -11,6 +11,7 @@ use lib qw(../lib/);
 
 use LCS::BV;
 use LCS;
+use LCS::Tiny;
 use Algorithm::Diff;
 use Algorithm::Diff::XS;
 use String::Similarity;
@@ -21,6 +22,7 @@ use Benchmark qw(:all) ;
 #use LCS::Tiny;
 #use LCS;
 use LCS::BV;
+use LCS::XS;
 
 #my $align = Align::Sequence->new;
 
@@ -50,6 +52,8 @@ my @data3 = ([qw/a b d/ x 50], [qw/b a d c/ x 50]);
 
 my @strings3 = map { join('',@$_) } @data3;
 
+if (1) {
+
 print "\n",'LCS: Algorithm::Diff, Algorithm::Diff::XS, LCS, LCS::BV',"\n","\n";
 
 print 'LCS: [Chrerrplzon] [Choerephon]',"\n","\n";
@@ -66,14 +70,20 @@ if (1) {
             LCS::BV->LCS(@data)
         },
         'LCS:LCS' => sub {
-            LCS::->LCS(@data)
+            LCS->LCS(@data)
+        },
+        'LCS:XS' => sub {
+            LCS::XS->LCS(@data)
+        },
+        'LCS:XSs' => sub {
+            LCS::XS->LCSs($strings[0],$strings[1])
         },
     });
 }
 
 print "\n",'LCS: [qw/a b d/ x 50], [qw/b a d c/ x 50]',"\n","\n";
 
-if (1) {
+if (0) {
     cmpthese( -1, {
         'AD:LCSidx' => sub {
             Algorithm::Diff::LCSidx(@data3)
@@ -92,7 +102,7 @@ if (1) {
 
 print "\n",'LLCS: [Chrerrplzon] [Choerephon]',"\n","\n";
 
-if (1) {
+if (0) {
     cmpthese( -1, {
         'AD:LCS_length' => sub {
             Algorithm::Diff::LCS_length(@data)
@@ -111,7 +121,7 @@ if (1) {
 
 print "\n",'LLCS: [qw/a b d/ x 50], [qw/b a d c/ x 50]',"\n","\n";
 
-if (1) {
+if (0) {
     cmpthese( -1, {
         'AD:LCS_length' => sub {
             Algorithm::Diff::LCS_length(@data3)
@@ -127,7 +137,7 @@ if (1) {
         },
     });
 }
-
+}
 
 if (0) {
     cmpthese( -1, {
@@ -200,7 +210,64 @@ if (0) {
     });
 }
 
+if (0) {
+print "\n",'LLCS: [Chrerrplzon] [Choerephon]',"\n","\n";
+
+if (1) {
+    cmpthese( -1, {
+        'LCS:BV:LLCS' => sub {
+            LCS::BV->LLCS(@data)
+        },
+        'LCS:LLCS' => sub {
+            LCS->LLCS(@data)
+        },
+        'LCStiny' => sub {
+            LCS::Tiny->LCS(@data)
+        },
+        'LCS::XS' => sub {
+            LCS::XS->LCS(@data)
+        },
+    });
+}
+
+print "\n",'LLCS: [qw/a b d/ x 50], [qw/b a d c/ x 50]',"\n","\n";
+
+if (0) {
+    cmpthese( -1, {
+        'LCS:BV:LLCS' => sub {
+            LCS::BV->LLCS(@data3)
+        },
+        'LCS:LLCS' => sub {
+            LCS->LLCS(@data3)
+        },
+        'LCStiny' => sub {
+            LCS::Tiny->LCS(@data3)
+        },
+    });
+}
+}
+
 =pod
+
+w3: Intel(R) Core(TM) i7-4770 CPU @ 3.40GHz
+https://ark.intel.com/content/www/de/de/ark/products/75122/intel-core-i7-4770-processor-8m-cache-up-to-3-90-ghz.html
+
+    Intel Core i7-4770 Processor
+    Intel® SSE4.1, Intel® SSE4.2, Intel® AVX2
+    4 Cores, 8 Threads
+    3.40 - 3.90 GHz
+    8 MB Cache
+    32 GB DDR3 RAM
+
+
+https://ark.intel.com/content/www/de/de/ark/products/83505/intel-core-i7-4770hq-processor-6m-cache-up-to-3-40-ghz.html
+
+    Intel Core i7-4770HQ Processor
+    Intel® SSE4.1, Intel® SSE4.2, Intel® AVX2
+    4 Cores, 8 Threads
+    2.20 - 3.40 GHz
+    6 MB Cache
+    16 GB DDR3 RAM
 
 LCS-BV/xt$ perl 50_diff_bench.t
 
@@ -237,6 +304,22 @@ LCS:LLCS         50.0/s           --          -37%             -37%         -98%
 AD:LCS_length    79.2/s          58%            --              -1%         -97%
 AD:XS:LCS_length 79.8/s          60%            1%               --         -97%
 LCS:BV:LLCS      2357/s        4614%         2874%            2853%           --
+
+
+
+LLCS: [Chrerrplzon] [Choerephon]
+
+                Rate    LCS:LLCS     LCStiny LCS:BV:LLCS
+LCS:LLCS     11377/s          --        -76%        -92%
+LCStiny      47733/s        320%          --        -64%
+LCS:BV:LLCS 133980/s       1078%        181%          --
+
+LLCS: [qw/a b d/ x 50], [qw/b a d c/ x 50]
+
+              Rate    LCS:LLCS     LCStiny LCS:BV:LLCS
+LCS:LLCS    50.5/s          --        -29%        -98%
+LCStiny     71.0/s         41%          --        -97%
+LCS:BV:LLCS 2337/s       4531%       3190%          --
 
 =cut
 
