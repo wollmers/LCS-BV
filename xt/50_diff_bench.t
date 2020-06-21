@@ -52,13 +52,15 @@ my @data3 = ([qw/a b d/ x 50], [qw/b a d c/ x 50]);
 
 my @strings3 = map { join('',@$_) } @data3;
 
-if (1) {
-
-print "\n",'LCS: Algorithm::Diff, Algorithm::Diff::XS, LCS, LCS::BV',"\n","\n";
-
-print 'LCS: [Chrerrplzon] [Choerephon]',"\n","\n";
+my $obj = LCS::BV->new();
 
 if (1) {
+
+  print "\n",'LCS: Algorithm::Diff, Algorithm::Diff::XS, LCS, LCS::BV',"\n","\n";
+
+  print 'LCS: [Chrerrplzon] [Choerephon]',"\n","\n";
+
+  if (1) {
     cmpthese( -1, {
         'AD:LCSidx' => sub {
             Algorithm::Diff::LCSidx(@data)
@@ -79,11 +81,11 @@ if (1) {
             LCS::XS->LCSs($strings[0],$strings[1])
         },
     });
-}
+  }
 
-print "\n",'LCS: [qw/a b d/ x 50], [qw/b a d c/ x 50]',"\n","\n";
+  print "\n",'LCS: [qw/a b d/ x 50], [qw/b a d c/ x 50]',"\n","\n";
 
-if (0) {
+  if (0) {
     cmpthese( -1, {
         'AD:LCSidx' => sub {
             Algorithm::Diff::LCSidx(@data3)
@@ -98,11 +100,11 @@ if (0) {
             LCS::->LCS(@data3)
         },
     });
-}
+  }
 
 print "\n",'LLCS: [Chrerrplzon] [Choerephon]',"\n","\n";
 
-if (0) {
+  if (0) {
     cmpthese( -1, {
         'AD:LCS_length' => sub {
             Algorithm::Diff::LCS_length(@data)
@@ -117,11 +119,11 @@ if (0) {
             LCS->LLCS(@data)
         },
     });
-}
+  }
 
-print "\n",'LLCS: [qw/a b d/ x 50], [qw/b a d c/ x 50]',"\n","\n";
+  print "\n",'LLCS: [qw/a b d/ x 50], [qw/b a d c/ x 50]',"\n","\n";
 
-if (0) {
+  if (0) {
     cmpthese( -1, {
         'AD:LCS_length' => sub {
             Algorithm::Diff::LCS_length(@data3)
@@ -136,7 +138,7 @@ if (0) {
             LCS->LLCS(@data3)
         },
     });
-}
+  }
 }
 
 if (0) {
@@ -210,10 +212,11 @@ if (0) {
     });
 }
 
-if (0) {
-print "\n",'LLCS: [Chrerrplzon] [Choerephon]',"\n","\n";
-
 if (1) {
+  print "\n",'LLCS: [Chrerrplzon] [Choerephon]',"\n","\n";
+
+  if (1) {
+    my $positions = $obj->prepare($data[0]);
     cmpthese( -1, {
         'LCS:BV:LLCS' => sub {
             LCS::BV->LLCS(@data)
@@ -227,12 +230,15 @@ if (1) {
         'LCS::XS' => sub {
             LCS::XS->LCS(@data)
         },
+        'LCS:BV:LLS_prepared' => sub {
+            $obj->LLCS_prepared($positions,$data[1]),
+        },
     });
-}
+  }
 
-print "\n",'LLCS: [qw/a b d/ x 50], [qw/b a d c/ x 50]',"\n","\n";
+  print "\n",'LLCS: [qw/a b d/ x 50], [qw/b a d c/ x 50]',"\n","\n";
 
-if (0) {
+  if (0) {
     cmpthese( -1, {
         'LCS:BV:LLCS' => sub {
             LCS::BV->LLCS(@data3)
@@ -244,7 +250,7 @@ if (0) {
             LCS::Tiny->LCS(@data3)
         },
     });
-}
+  }
 }
 
 =pod

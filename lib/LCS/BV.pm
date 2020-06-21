@@ -3,7 +3,7 @@ package LCS::BV;
 use 5.010001;
 use strict;
 use warnings;
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 #use utf8;
 
 our $width = int 0.999+log(~0)/log(2);
@@ -382,7 +382,7 @@ This works only on object mode.
 =item LLCS_prepared($positions,\@a)
 
 Return the length of a Longest Common Subsequence, with one side prepared.
-It returns an integer.
+It returns an integer. It is two times faster than LLCS().
 
 =back
 

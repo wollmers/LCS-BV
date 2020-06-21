@@ -1,6 +1,7 @@
 Revision history for LCS::BV
 
 {{$NEXT}}
+        - improve coverage to 100%
 
 0.11  2020-06-21 08:01:50 CEST
         - remove warning Possible precedence problem on bitwise & operator
