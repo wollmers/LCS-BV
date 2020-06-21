@@ -1,6 +1,7 @@
 Revision history for LCS::BV
 
 {{$NEXT}}
+        - remove warning Possible precedence problem on bitwise & operator
 
 0.10  2020-06-21 07:49:14 CEST
         - adding methods prepare, LLCS_prepare

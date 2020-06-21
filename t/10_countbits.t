@@ -24,7 +24,7 @@ my $tests64 = [
   ['prefix_64',0xffffffffffffffff,64],
 ];
 
-if (1 & $width == 64) {
+if (1 & ($width == 64)) {
   #$LCS::BV::width = 64;
   for my $test (@{$tests64}) {
     is(LCS::BV::_count_bits($test->[1]),$test->[2],'_count_bits 64 '.$test->[0]);
@@ -39,14 +39,14 @@ my $tests32 = [
   ['prefix_32',0xffffffff,32],
 ];
 
-if (1 & $width == 32) {
+if (1 & ($width == 32)) {
   #$LCS::BV::width = 32;
   for my $test (@{$tests32}) {
     is(LCS::BV::_count_bits($test->[1]),$test->[2],'_count_bits 32 '.$test->[0]);
   }
 }
 
-if (1 & $width == 64) {
+if (1 & ($width == 64)) {
   $LCS::BV::width = 32;
   for my $test (@{$tests32}) {
     is(LCS::BV::_count_bits($test->[1]),$test->[2],'_count_bits 32 '.$test->[0]);
