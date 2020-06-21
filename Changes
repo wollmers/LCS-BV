@@ -1,6 +1,8 @@
 Revision history for LCS::BV
 
 {{$NEXT}}
+
+0.10  2020-06-21 07:49:14 CEST
         - adding methods prepare, LLCS_prepare
 
 0.09  2019-11-05 23:00:06 CET
