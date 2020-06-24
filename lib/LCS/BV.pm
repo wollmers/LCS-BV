@@ -379,7 +379,7 @@ For comparison of the same sequence @a many times against different sequences @b
 it can be faster to prepare @a. It returns a hashref of positions.
 This works only on object mode.
 
-=item LLCS_prepared($positions,\@a)
+=item LLCS_prepared($positions,\@b)
 
 Return the length of a Longest Common Subsequence, with one side prepared.
 It returns an integer. It is two times faster than LLCS().
