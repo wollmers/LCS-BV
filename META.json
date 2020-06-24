@@ -55,7 +55,7 @@
    "provides" : {
       "LCS::BV" : {
          "file" : "lib/LCS/BV.pm",
-         "version" : "0.13"
+         "version" : "0.14"
       }
    },
    "release_status" : "stable",
@@ -70,7 +70,7 @@
          "web" : "https://github.com/wollmers/LCS-BV"
       }
    },
-   "version" : "0.13",
+   "version" : "0.14",
    "x_contributors" : [
       "ade ishs <ade@adeishs.com>",
       "Helmut Wollmersdorfer <helmut@wollmersdorfer.at>",

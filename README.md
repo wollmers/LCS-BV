@@ -57,7 +57,7 @@ than the used wordsize of the hardware (32 or 64 bits).
     it can be faster to prepare @a. It returns a hashref of positions.
     This works only on object mode.
 
-- LLCS\_prepared($positions,\\@a)
+- LLCS\_prepared($positions,\\@b)
 
     Return the length of a Longest Common Subsequence, with one side prepared.
     It returns an integer. It is two times faster than LLCS().
